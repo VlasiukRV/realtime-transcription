@@ -1,0 +1,49 @@
+# Python bytecode
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# PyCharm-specific files
+.idea/
+git status
+# Virtual environment
+venv/
+env/
+.venv/
+.env/
+.env
+
+# Jupyter Notebook
+.ipynb_checkpoints/
+
+# Distribution / packaging
+.Python
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# Logs
+*.log
+
+# SQLite database file
+*.db
+
+# Temporary files
+*.swp
+*.swo
+*.bak
+*.tmp
+
+# Test coverage directory
+.coverage
+nosetests.xml
+coverage.xml
+*.cover
+
+# Pytest cache
+.pytest_cache/
+
+# VS Code settings (if using VS Code alongside PyCharm)
+.vscode/

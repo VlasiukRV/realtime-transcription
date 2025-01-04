@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Real-Time Transcription and Translation (Settings)</title>
+    <link rel="stylesheet" href="/static/css/styles.css">
+</head>
+<body>
+
+<div class="container">
+    <!-- Верхняя панель -->
+    <div class="header">
+        <a href="/">
+            <button>back to Index Page</button>
+        </a>
+        <button id="startButton">Start Worker</button>
+        <button id="stopButton">Stop Worker</button>
+    </div>
+
+    <div id="responseMessage" class="text-display">
+    </div>
+
+    <div id="service-status-output" class="text-display">
+    </div>
+
+    <ul>
+        {% for client in active_clients %}
+            <li>{{ client.ip }}, {{ client.port }}</li>
+        {% endfor %}
+    </ul>
+
+    <h1>Add a New Language</h1>
+    <form id="langForm"">
+        <label for="langInput">Language Code (e.g., 'en', 'ru'):</label>
+        <input type="text" id="langInput" name="lang" required>
+        <button type="submit">Add Language</button>
+    </form>
+
+</div>
+
+<script src="/static/js/settings.js"></script>
+</body>
+</html>
