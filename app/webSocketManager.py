@@ -1,6 +1,7 @@
 import asyncio
 import json
-from fastapi import WebSocket, WebSocketDisconnect, websockets
+import websockets
+from fastapi import WebSocket, WebSocketDisconnect
 from app.utils import logger
 
 BOLD = "\033[1m"
