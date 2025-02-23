@@ -1,6 +1,6 @@
 import asyncio
 import json
-from fastapi import WebSocket, WebSocketDisconnect
+from fastapi import WebSocket, WebSocketDisconnect, websockets
 from app.utils import logger
 
 BOLD = "\033[1m"
@@ -43,14 +43,19 @@ class WebSocketManager:
             # Prepare tasks to send data to all clients
             logger.info(f"Broadcasting data to clients: {text}")
             tasks = []
+            disconnected_clients = set()
+
             async with self.mutex_active_clients:  # Using renamed mutex
                 for client in self.active_clients:
-                    tasks.append(client.send_text(json.dumps(text, ensure_ascii=False)))
+                    try:
+                        await client.send_text(json.dumps(text, ensure_ascii=False))
+                    except websockets.exceptions.ConnectionClosed:
+                        disconnected_clients.add(client)
 
             # Send the messages to all clients
-            if tasks:
-                await asyncio.sleep(1)
-                await asyncio.gather(*tasks)  # Send messages to all clients simultaneously
+            # if tasks:
+            #     await asyncio.sleep(1)
+            #     await asyncio.gather(*tasks)  # Send messages to all clients simultaneously
 
     async def handle_connection(self, websocket: WebSocket):
         """
