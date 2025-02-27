@@ -23,13 +23,15 @@ class LangRequest(BaseModel):
 
 class RealTimeTranslation:
     def __init__(self):
-        self.app = FastAPI()
+        self.app = FastAPI(title="RealTime-transcription", version="1.0.1")
 
         # Mount static files
         self.app.mount("/static", StaticFiles(directory="app/static"), name="static")
 
         # Initialize components
         self.lang_manager_arr = {}
+        self.mutex_lang_manager_arr = asyncio.Lock()  # Mutex for managing active clients
+
         self.ws_manager = WebSocketManager()
         self.templates = Jinja2Templates(directory="app/templates")
         self.hostname = socket.gethostname()
@@ -114,27 +116,41 @@ class RealTimeTranslation:
 
     async def start_working_tasks(self):
         logger.info("Starting transcription and broadcasting tasks...")
+
         self.transcriber.run()
         for lang in self.lang_manager_arr:
             self.lang_manager_arr[lang]["broadcast_task"] = asyncio.create_task(
                 self.create_broadcast_task(lang)
             )
 
+    async def pause_working_tasks(self):
+        if self.transcriber:
+            self.transcriber.pause()
+
     async def stop_working_tasks(self):
         logger.info("Stopping tasks...")
         for lang in self.lang_manager_arr:
-            self.lang_manager_arr[lang]["ws_manager"].stop_message_broadcasting()
+            await self.lang_manager_arr[lang]["ws_manager"].stop_message_broadcasting()
+            self.lang_manager_arr[lang]["ws_manager"] = None
+        self.lang_manager_arr.clear()
+
         if self.transcriber:
-            self.transcriber.close()
+            self.transcriber.stop()
 
     async def handle_transcription(self, transcription_text: str):
         """
         Handle transcription and translation for each language.
         """
+
         tasks = []
         for lang in self.lang_manager_arr:
             tasks.append(self.translate_and_broadcast(lang, transcription_text))
+
         await asyncio.gather(*tasks)
+
+        # for lang in self.lang_manager_arr:
+        #     if not self.lang_manager_arr[lang]['ws_manager'].has_active_clients():
+        #         self.lang_manager_arr.pop(lang, None)
 
     async def translate_and_broadcast(self, lang: str, transcription_text: str):
         translated_text = await self.translator.translate_text(

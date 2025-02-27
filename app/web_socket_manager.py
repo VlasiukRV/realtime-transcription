@@ -1,8 +1,7 @@
 import asyncio
-import websockets
-import json
 from fastapi import WebSocket, WebSocketDisconnect
 from app.utils import logger
+from app.web_socket_connection import WebSocketConnection
 
 BOLD = "\033[1m"
 RESET = "\033[0m"
@@ -21,6 +20,15 @@ class WebSocketManager:
         self.stop_sending_event = asyncio.Event()
         self.stop_sending_event.clear()
 
+    def has_active_clients(self) -> bool:
+        """
+        Method to check if there are any active clients.
+
+        Returns:
+            bool: True if there are active clients, False otherwise.
+        """
+        return len(self.active_clients) > 0
+
     async def broadcast_messages(self):
         """
         Broadcast messages to all connected clients.
@@ -29,24 +37,34 @@ class WebSocketManager:
 
         while not self.stop_sending_event.is_set():
             await asyncio.sleep(1)
+            await self._broadcast_messages_logic()
 
-            text = ""
-            async with self.mutex_buffer:
-                if not self.buffer.empty():
-                    text = await self.buffer.get()
 
-            if not text:
-                continue
+    async def _broadcast_messages_logic(self):
+        text = await self._get_message_from_queue()
 
-            # Prepare tasks for sending messages to all clients
-            logger.info(f"Broadcasting data to clients: {text}")
-            tasks = []
-            async with self.mutex_active_clients:
-                for client in self.active_clients:
-                    tasks.append(client.send_message(text))
+        if not text:
+            return
 
-            if tasks:
-                await asyncio.gather(*tasks)
+        # Remove clients with is_open == False
+        async with self.mutex_active_clients:
+            self.active_clients = set(client for client in self.active_clients if client.is_open)
+
+        # Prepare tasks for sending messages to all clients
+        logger.info(f"Broadcasting data to clients: {text}")
+        tasks = []
+        async with self.mutex_active_clients:
+            for client in self.active_clients:
+                tasks.append(client.send_message(text))
+
+        if tasks:
+            await asyncio.gather(*tasks)
+
+    async def _get_message_from_queue(self):
+        async with self.mutex_buffer:
+            if not self.buffer.empty():
+                return await self.buffer.get()
+        return ""
 
     async def handle_connection(self, websocket: WebSocket):
         """
