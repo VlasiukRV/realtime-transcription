@@ -1,156 +1,228 @@
-const serverIp = window.location.hostname;
+(function () {
 
-const serviceMessageOutput = document.getElementById("service-message-output")
-const textDisplay = document.getElementById('output');
-const pauseButton = document.getElementById('pause-btn');
-const clearButton = document.getElementById('clear-btn');
-const copyButton = document.getElementById('copy-btn');
+    const serverIp = window.location.hostname;
+    const $serviceMessageOutput = $("#service-message-output");
+    const $serviceMessageOutputIcon = $("#service-message-output-icon");
+    const $textDisplay = $('#output');
+    const $footer = $('.footer');
+    const $toggleThemeBtn = $('#toggle-theme-btn');
 
-let isPaused = false;
+    let isPaused = false;
+    let socket = null;
+    let reconnectInterval;
 
-const toggleThemeBtn = document.getElementById('toggle-theme-btn');
+    // Constants for icons
+    const ICON_SUN = '☀️';
+    const ICON_MOON = '🌙';
+    const ICON_CLEAR = '🔄';
+    const ICON_PLAY = '▶️';
+    let ICON_PAUSE = '⏯';
 
-let lang = '';
-let socket = undefined;
-let reconnectInterval;
-
-async function connectWebSocket() {
-    if (lang === "") {
-        return
-    }
-    serviceMessageOutput.innerHTML = `Connecting to ${serverIp}......`;
-
-    // Create a new WebSocket connection
-    socket = new WebSocket(`ws://${serverIp}:8000/ws/transcribe/${lang}`);
-
-    socket.onmessage = function (event) {
-        let message = event.data;
-        if (message.startsWith("Service Message:")) {
-            serviceMessageOutput.innerHTML += `<p><strong>Service status:</strong> ${message.slice(17)}</p>`;
-        } else {
-            addText(event.data);
+    // Theme structure, storing theme names and related icons
+    const THEMES = {
+        light: {
+            name: 'light',
+            icon: ICON_SUN
+        },
+        dark: {
+            name: 'dark',
+            icon: ICON_MOON
         }
     };
 
-    socket.onopen = function () {
+    // Set theme based on localStorage upon page load
+    function setThemeFromLocalStorage() {
+        const savedTheme = localStorage.getItem('theme') || THEMES.light.name; // Default theme
+        $("html").attr('data-theme', savedTheme);
+        $toggleThemeBtn.text(savedTheme === THEMES.dark.name ? ICON_SUN : ICON_MOON);
+    }
+
+    // Toggle between light and dark themes
+    function toggleTheme() {
+        const currentTheme = $("html").attr('data-theme') || THEMES.light.name;
+        const newTheme = currentTheme === THEMES.light.name ? THEMES.dark.name : THEMES.light.name;
+        $("html").attr('data-theme', newTheme);
+        localStorage.setItem('theme', newTheme); // Save new theme in localStorage
+        $toggleThemeBtn.text(newTheme === THEMES.dark.name ? ICON_SUN : ICON_MOON); // Update button text accordingly
+    }
+
+    // Connect to WebSocket with the specified language
+    async function connectWebSocket(lang) {
+        if (!lang) return; // Do not connect if no language is specified
+
+        $serviceMessageOutput.html(`Connecting to ${serverIp}...`);
+
+        socket = new WebSocket(`ws://${serverIp}:8000/ws/transcribe/${lang}`);
+
+        socket.onmessage = (event) => handleWebSocketMessage(event); // Handle incoming messages
+        socket.onopen = () => handleWebSocketOpen(lang); // Handle WebSocket open event
+        socket.onclose = () => handleWebSocketClose(); // Handle WebSocket close event
+        socket.onerror = (error) => handleWebSocketError(error); // Handle WebSocket error event
+    }
+
+    // Handle incoming WebSocket messages
+    function handleWebSocketMessage(event) {
+        let message = event.data;
+        if (message.startsWith("Service Message:")) {
+            $serviceMessageOutput.append(`<p><strong>Service status:</strong> ${message.slice(17)}</p>`);
+        } else {
+            addText(event.data); // Add regular messages to the display
+        }
+    }
+
+    // Handle WebSocket open event (connection established)
+    function handleWebSocketOpen(lang) {
         console.log(`WebSocket connected for language: ${lang}`);
-        serviceMessageOutput.innerHTML = `Connected to WebSocket for language: ${lang}`;
+        $serviceMessageOutput.html(`Connected to WebSocket for language: ${lang}`);
+        $serviceMessageOutputIcon.addClass('blinking');
+        clearInterval(reconnectInterval); // Stop checking for reconnections once connected
+    }
 
-        // If the connection is restored, stop the reconnection checks
-        clearInterval(reconnectInterval);
-    };
-
-    socket.onclose = function () {
+    // Handle WebSocket close event (disconnected)
+    function handleWebSocketClose() {
         console.log("Disconnected from WebSocket");
-        serviceMessageOutput.innerHTML = `Disconnected from WebSocket`;
-
-        // Start checking the connection every 5 seconds
-        reconnectInterval = setInterval(checkConnection, 5000);
-    };
-
-    socket.onerror = function (error) {
-        console.log("WebSocket Error:", error);
-        serviceMessageOutput.innerHTML = `Error: ${error}`;
-    };
-}
-
-function checkConnection() {
-    console.log("Checking WebSocket connection...");
-
-    // If the WebSocket connection is closed or in the process of closing, try to reconnect
-    if (socket.readyState === WebSocket.CLOSED || socket.readyState === WebSocket.CLOSING) {
-        console.log("Attempting to reconnect...");
-        connectWebSocket();  // Reconnect
+        $serviceMessageOutput.html(`Disconnected from WebSocket`);
+        $serviceMessageOutputIcon.removeClass('blinking');
+        reconnectInterval = setInterval(checkConnection, 5000); // Check connection every 5 seconds
     }
-}
 
-// Проверка сохранённой темы в localStorage
-const savedTheme = localStorage.getItem('theme');
-if (savedTheme) {
-    document.documentElement.setAttribute('data-theme', savedTheme);
-    toggleThemeBtn.textContent = savedTheme === 'dark' ? '☀️' : '🌙';
-}
-
-// Переключение темы
-toggleThemeBtn.addEventListener('click', () => {
-    const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
-    const newTheme = currentTheme === 'light' ? 'dark' : 'light';
-
-    // Установить новую тему
-    document.documentElement.setAttribute('data-theme', newTheme);
-    localStorage.setItem('theme', newTheme);
-
-    // Обновить текст кнопки
-    toggleThemeBtn.textContent = newTheme === 'dark' ? '☀️' : '🌙';
-});
-
-// Добавление текста с интервалом
-function addText(text) {
-    if (!isPaused) {
-        const newText = document.createElement('p');
-        newText.textContent = text;
-        textDisplay.appendChild(newText);
-
-        // Автопрокрутка вниз
-        textDisplay.scrollTop = textDisplay.scrollHeight;
-
+    // Handle WebSocket error event
+    function handleWebSocketError(error) {
+        console.error("WebSocket Error:", error);
+        $serviceMessageOutput.html(`WebSocket Error${error}`);
+        $serviceMessageOutputIcon.removeClass('blinking');
+        $serviceMessageOutput.html(`Error: ${error}`); // Show error message
     }
-}
 
-// Обработчик кнопки паузы
-pauseButton.addEventListener('click', () => {
-    isPaused = !isPaused;
-    pauseButton.textContent = isPaused ? "▶️" : "⏯";
-});
+    // Check WebSocket connection and attempt to reconnect if necessary
+    function checkConnection() {
+        if (socket.readyState === WebSocket.CLOSED || socket.readyState === WebSocket.CLOSING) {
+            console.log("Attempting to reconnect...");
+            connectWebSocket(localStorage.getItem('selectedLanguage')); // Reconnect using the saved language
+        }
+    }
 
-// Обработчик кнопки очистки
-clearButton.addEventListener('click', () => {
-    textDisplay.innerHTML = '';
-});
+    // Add text to the display with auto-scroll
+    function addText(text) {
+        if (!isPaused) { // Only add text if not paused
+            const newText = $('<p>').text(text);
+            $textDisplay.append(newText);
+            $textDisplay.scrollTop($textDisplay[0].scrollHeight); // Auto-scroll to the bottom
+        }
+    }
 
-// Обработчик кнопки копирования
-// copyButton.addEventListener('click', () => {
-//     const text = Array.from(textDisplay.children)
-//         .map(child => child.textContent)
-//         .join('\n');
-//     navigator.clipboard.writeText(text).then(() => {
-//         alert('Текст скопирован!');
-//     });
-// });
+    // Toggle pause/resume functionality
+    function togglePause($button) {
+        isPaused = !isPaused;
+        if (isPaused) {
+            $serviceMessageOutputIcon.removeClass('blinking');
+        } else {
+            $serviceMessageOutputIcon.addClass('blinking');
+        }
+        $button.append(isPaused ? ICON_PLAY : ICON_PAUSE); // Update button text with constants
+    }
 
-async function changeLanguage(event) {
-    lang = event.target.value;
+    // Clear all displayed text
+    function clearText() {
+        $textDisplay.empty();
+    }
 
+    // Change the language and update WebSocket connection
+    async function changeLanguageSelect(newLang) {
+        localStorage.setItem('selectedLanguage', newLang); // Store the selected language in localStorage
         try {
             const response = await fetch("/api/addLang", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"
                 },
-                body: JSON.stringify({lang: lang}) // Отправляем JSON с языком
+                body: JSON.stringify({lang: newLang}) // Send the selected language to the server
             });
 
             if (response.ok) {
-
-                if (socket && socket instanceof WebSocket) {
-                    socket.close(1000, 'Обычное завершение');
-                }
-
-                await connectWebSocket();
+                if (socket) socket.close(1000, 'Normal closure'); // Close current WebSocket if it exists
+                await connectWebSocket(newLang); // Reconnect with the new language
                 const result = await response.json();
-                console.log(result.message);
+                console.log(result.message); // Log the response from the server
             } else {
                 const error = await response.json();
-                console.log(`Error: ${error.detail}`);
+                console.log(`Error: ${error.detail}`); // Log error if the response is not OK
             }
         } catch (error) {
-            console.error("Error:", error);
+            console.error("Error:", error); // Log any network or other errors
         }
-}
+    }
 
-window.onload = function () {
-    const languageSelect = document.getElementById("languageSelect");
+    // Create and append the language select dropdown with jQuery
+    function createLanguageSelect(defaultLang = '') {
+        const languages = [
+            {value: 'en', text: 'English'},
+            {value: 'ru', text: 'Russian'},
+            {value: 'fr', text: 'Français'}
+        ];
 
-    languageSelect.addEventListener("change", changeLanguage);
+        // Create <select> element
+        const $select = $('<select>', {id: 'language-select'});
 
-};
+        // Generate and append <option> elements
+        languages.forEach(lang => {
+            $select.append($('<option>', {
+                value: lang.value,
+                text: lang.text
+            }));
+        });
+
+        $select.val(defaultLang); // Set the language select dropdown to the saved language
+        $select.on("change", function (event) {
+            const newLang = event.target.value;
+            changeLanguageSelect(newLang).then((result) => {
+
+            }).catch((error) => {
+                console.error("Error changing language:", error);
+            });
+        });
+
+        // Append the <select> element to the DOM (e.g., to the body or specific container)
+        $('#language-container').append($select);
+    }
+
+    function createFooterButtons() {
+
+        const $clearButton = $('<button>', {
+            id: 'clear-btn',
+            text: ICON_CLEAR,
+            click: function () {
+                clearText();
+            }
+        });
+
+        const $pauseButton = $('<button>', {
+            id: 'pause-btn',
+            text: ICON_PAUSE,
+            click: function () {
+                togglePause($pauseButton);
+            }
+        });
+
+        $footer.append($clearButton, $pauseButton);
+
+    }
+
+    // Initialize the page when it loads
+    $(document).ready(function () {
+        createFooterButtons();
+        setThemeFromLocalStorage(); // Set theme based on localStorage
+
+        let lang = localStorage.getItem('selectedLanguage') || 'ru'; // Default language is 'ru' if none is stored
+        createLanguageSelect(lang); // Create language select dropdown
+
+        changeLanguageSelect(lang).then((result) => {
+
+        }).catch((error) => {
+            console.error("Error connect WebSocket:", error);
+        });
+        // Connect to WebSocket with the saved language
+
+        $toggleThemeBtn.on('click', toggleTheme); // Add event listener for the theme toggle button
+    });
+})();

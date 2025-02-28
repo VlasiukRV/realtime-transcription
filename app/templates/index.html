@@ -10,14 +10,16 @@
 
 <div class="container">
 
-    <span> 🔊</span> <br> <span id="service-message-output">...</span>
+    <div class="message-output-container">
+        <span id="service-message-output-icon" class="blinking">🔊</span>
+        <span id="service-message-output">...</span>
+    </div>
     <div class="header">
-        <label for="languageSelect">Select Language:</label>
-        <select id="languageSelect">
-            <option value="en">English</option>
-            <option value="ru">Russian</option>
-            <option value="fr">Français</option>
-        </select>
+
+        <div id="language-container">
+            <label for="language-select">Select Language:</label>
+        </div>
+
         <button id="toggle-theme-btn">🌙</button>
         <a href="/settings">
             <button>⚙️</button>
@@ -29,11 +31,11 @@
     </div>
 
     <div class="footer">
-        <button id="clear-btn">🔄</button>
-        {#<button id="copy-btn">⤴️</button>#}
-        <button id="pause-btn">⏯</button>
+
     </div>
+
 </div>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="/static/js/main.js"></script>
 </body>
 </html>
