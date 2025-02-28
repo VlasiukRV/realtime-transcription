@@ -17,7 +17,6 @@ class Transcriber:
         self.handle_transcription = _handle_transcription
 
         self.transcriber = None
-        self.microphone_stream = None
         self.running = False
         self.transcription_thread = None
 
@@ -48,7 +47,6 @@ class Transcriber:
         """Close the transcriber and stop the microphone stream."""
         if self.running:
             self.running = False
-            # self._stop_microphone_stream()
             self.transcriber.close()
             time.sleep(2)
             if self.transcription_thread:
@@ -61,7 +59,7 @@ class Transcriber:
         """Start transcription."""
         try:
             self.status = "on"
-            microphone_stream = self._start_microphone_stream()
+            microphone_stream = aai.extras.MicrophoneStream(sample_rate=self.sample_rate)
             self.transcriber.stream(microphone_stream)
         except Exception as e:
             self._set_status_message(f"An error occurred during transcription: {e}")
@@ -105,20 +103,6 @@ class Transcriber:
         finally:
             self.transcription_thread = None
             self._set_status_message("Transcription thread finished.")
-
-    def _start_microphone_stream(self):
-        """Start and return the microphone stream."""
-        if self.microphone_stream is None:
-            self.microphone_stream = aai.extras.MicrophoneStream(sample_rate=self.sample_rate)
-            self._set_status_message("Initializing microphone stream.")
-        return self.microphone_stream
-
-    def _stop_microphone_stream(self):
-        """Stop the microphone stream."""
-        if self.microphone_stream:
-            self._set_status_message("Stopping microphone stream.")
-            self.microphone_stream.close()
-            self.microphone_stream = None
 
     def _set_status_message(self, message):
         logger.info(message)

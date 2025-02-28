@@ -123,10 +123,6 @@ class RealTimeTranslation:
                 self.create_broadcast_task(lang)
             )
 
-    async def pause_working_tasks(self):
-        if self.transcriber:
-            self.transcriber.pause()
-
     async def stop_working_tasks(self):
         logger.info("Stopping tasks...")
         for lang in self.lang_manager_arr:
@@ -147,10 +143,6 @@ class RealTimeTranslation:
             tasks.append(self.translate_and_broadcast(lang, transcription_text))
 
         await asyncio.gather(*tasks)
-
-        # for lang in self.lang_manager_arr:
-        #     if not self.lang_manager_arr[lang]['ws_manager'].has_active_clients():
-        #         self.lang_manager_arr.pop(lang, None)
 
     async def translate_and_broadcast(self, lang: str, transcription_text: str):
         translated_text = await self.translator.translate_text(
