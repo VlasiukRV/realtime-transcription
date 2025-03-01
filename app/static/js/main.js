@@ -10,6 +10,11 @@
     let isPaused = false;
     let socket = null;
     let reconnectInterval;
+    let languagesDb = [
+        {value: 'en', text: 'English'},
+        {value: 'ru', text: 'Russian'},
+        {value: 'fr', text: 'Français'}
+    ];
 
     // Constants for icons
     const ICON_SUN = '☀️';
@@ -114,12 +119,17 @@
     // Toggle pause/resume functionality
     function togglePause($button) {
         isPaused = !isPaused;
+
+        const $icon = $button.find('img');
+
         if (isPaused) {
             $serviceMessageOutputIcon.removeClass('blinking');
+            $icon.attr('src', '/static/img/play-svgrepo-com.svg');
         } else {
+            $icon.attr('src', '/static/img/play-pause-svgrepo-com.svg');
             $serviceMessageOutputIcon.addClass('blinking');
         }
-        $button.append(isPaused ? ICON_PLAY : ICON_PAUSE); // Update button text with constants
+
     }
 
     // Clear all displayed text
@@ -154,18 +164,13 @@
     }
 
     // Create and append the language select dropdown with jQuery
-    function createLanguageSelect(defaultLang = '') {
-        const languages = [
-            {value: 'en', text: 'English'},
-            {value: 'ru', text: 'Russian'},
-            {value: 'fr', text: 'Français'}
-        ];
+    function createLanguageSelect(languagesDb, defaultLang = '') {
 
         // Create <select> element
         const $select = $('<select>', {id: 'language-select'});
 
         // Generate and append <option> elements
-        languages.forEach(lang => {
+        languagesDb.forEach(lang => {
             $select.append($('<option>', {
                 value: lang.value,
                 text: lang.text
@@ -190,21 +195,35 @@
 
         const $clearButton = $('<button>', {
             id: 'clear-btn',
-            text: ICON_CLEAR,
+            html: "<img src='/static/img/refresh-cw-alt-1-svgrepo-com.svg' alt='Pause'>",
             click: function () {
                 clearText();
             }
         });
+        $clearButton.addClass('button');
+        $clearButton.find('img').addClass('button-icon');
 
         const $pauseButton = $('<button>', {
             id: 'pause-btn',
-            text: ICON_PAUSE,
+            html: "<img src='/static/img/play-pause-svgrepo-com.svg' alt='Pause'>",
             click: function () {
                 togglePause($pauseButton);
             }
         });
+        $pauseButton.addClass('button');
+        $pauseButton.find('img').addClass('button-icon');
 
-        $footer.append($clearButton, $pauseButton);
+        const $settingsButton = $('<button>', {
+            id: 'clear-btn',
+            html: "<img src='/static/img/settings-cog-svgrepo-com.svg' alt='Pause'>",
+            click: function () {
+                window.location.href = "/settings";
+            }
+        });
+        $settingsButton.addClass('button');
+        $settingsButton.find('img').addClass('button-icon');
+
+        $footer.append($clearButton, $pauseButton, $settingsButton);
 
     }
 
@@ -214,7 +233,7 @@
         setThemeFromLocalStorage(); // Set theme based on localStorage
 
         let lang = localStorage.getItem('selectedLanguage') || 'ru'; // Default language is 'ru' if none is stored
-        createLanguageSelect(lang); // Create language select dropdown
+        createLanguageSelect(languagesDb, lang); // Create language select dropdown
 
         changeLanguageSelect(lang).then((result) => {
 

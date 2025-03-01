@@ -157,6 +157,18 @@ button:active {
   background-color: var(--color-primary-active);
 }
 
+button img {
+    width: 20px;  /* Устанавливаем ширину иконки */
+    height: 20px; /* Устанавливаем высоту иконки */
+    margin-right: 10px; /* Расстояние между иконкой и текстом */
+}
+
+.button-icon {
+    width: 20px;
+    height: 20px;
+    margin-right: 10px; /* Расстояние между иконкой и текстом */
+}
+
 /* Адаптивность */
 @media (max-width: 768px) {
   .container {
