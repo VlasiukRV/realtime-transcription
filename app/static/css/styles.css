@@ -163,12 +163,6 @@ button img {
     margin-right: 10px; /* Расстояние между иконкой и текстом */
 }
 
-.button-icon {
-    width: 20px;
-    height: 20px;
-    margin-right: 10px; /* Расстояние между иконкой и текстом */
-}
-
 /* Адаптивность */
 @media (max-width: 768px) {
   .container {

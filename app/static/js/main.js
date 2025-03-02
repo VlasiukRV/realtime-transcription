@@ -191,40 +191,30 @@
         $('#language-container').append($select);
     }
 
+    function getButtonElement(img_url, alt_text, func) {
+
+        const $button = $('<button>', {
+            html: `<img src="${img_url}" alt="${alt_text}">`,
+            click: func
+        });
+        $button.addClass('button');
+
+        return $button
+    }
+
     function createFooterButtons() {
 
-        const $clearButton = $('<button>', {
-            id: 'clear-btn',
-            html: "<img src='/static/img/refresh-cw-alt-1-svgrepo-com.svg' alt='Pause'>",
-            click: function () {
-                clearText();
-            }
-        });
-        $clearButton.addClass('button');
-        $clearButton.find('img').addClass('button-icon');
-
-        const $pauseButton = $('<button>', {
-            id: 'pause-btn',
-            html: "<img src='/static/img/play-pause-svgrepo-com.svg' alt='Pause'>",
-            click: function () {
-                togglePause($pauseButton);
-            }
-        });
-        $pauseButton.addClass('button');
-        $pauseButton.find('img').addClass('button-icon');
-
-        const $settingsButton = $('<button>', {
-            id: 'clear-btn',
-            html: "<img src='/static/img/settings-cog-svgrepo-com.svg' alt='Pause'>",
-            click: function () {
-                window.location.href = "/settings";
-            }
-        });
-        $settingsButton.addClass('button');
-        $settingsButton.find('img').addClass('button-icon');
+        const $clearButton = getButtonElement('/static/img/refresh-cw-alt-1-svgrepo-com.svg', "clear", function () {
+            clearText();
+        })
+        const $pauseButton = getButtonElement('/static/img/play-pause-svgrepo-com.svg', 'pause play', function () {
+            togglePause($pauseButton);
+        })
+        const $settingsButton = getButtonElement('/static/img/settings-cog-svgrepo-com.svg', 'settings', function () {
+            window.location.href = "/settings";
+        })
 
         $footer.append($clearButton, $pauseButton, $settingsButton);
-
     }
 
     // Initialize the page when it loads
