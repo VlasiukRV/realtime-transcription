@@ -62,38 +62,30 @@ document.getElementById('stopButton').addEventListener('click', async () => {
     }
 });
 
-async function addLanguage(event) {
-    event.preventDefault();
-    const langInput = document.getElementById("langInput").value;
 
-    if (!langInput) {
-        alert("Please enter a language!");
-        return;
-    }
+window.onload = async function () {
 
     try {
-        const response = await fetch("/api/addLang", {
-            method: "POST",
+        // Sending a POST request to the 'api/stop' endpoint
+        const response = await fetch('/api/state_json', {
+            method: 'GET',
             headers: {
-                "Content-Type": "application/json"
+                'Content-Type': 'application/json', // Setting the content type to JSON
             },
-            body: JSON.stringify({lang: langInput}) // Отправляем JSON с языком
         });
 
         if (response.ok) {
-            const result = await response.json();
-            alert(result.message);
+            // If the response is successful, display the response text
+            let text;
+            text = await response.text();
+            document.getElementById('state_json').innerHTML = text;
         } else {
-            const error = await response.json();
-            alert(`Error: ${error.detail}`);
+            // If the response is not successful, show an error message
+            document.getElementById('state_json').innerHTML = "Error stopping the worker.";
         }
     } catch (error) {
-        console.error("Error:", error);
-        alert("Failed to add language.");
+        // Handle any errors that occur during the connection with the server
+        document.getElementById('state_json').innerHTML = "Connection error with the server.";
     }
-}
 
-window.onload = function () {
-    const form = document.getElementById("langForm");
-    form.addEventListener("submit", addLanguage);
 };

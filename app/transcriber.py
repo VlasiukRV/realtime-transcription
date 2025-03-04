@@ -106,4 +106,4 @@ class Transcriber:
 
     def _set_status_message(self, message):
         logger.info(message)
-        self.status_message = message
+        self.status_message = self.status_message + '\n ' + message
