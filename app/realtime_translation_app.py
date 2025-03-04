@@ -1,4 +1,5 @@
 import asyncio
+import os
 import socket
 
 from fastapi import FastAPI, WebSocket
@@ -12,7 +13,7 @@ from starlette.responses import JSONResponse
 from app.web_socket_manager import WebSocketManager
 from app.transcriber import Transcriber
 from app.translator import Translator
-from app.utils import logger
+from app.utils import logger, generate_version
 
 
 class LangRequest(BaseModel):
@@ -30,7 +31,6 @@ class RealTimeTranslation:
         self.lang_manager_arr = {}
         self.mutex_lang_manager_arr = asyncio.Lock()  # Mutex for managing active clients
 
-        self.ws_manager = WebSocketManager()
         self.templates = Jinja2Templates(directory="app/templates")
         self.hostname = socket.gethostname()
 
@@ -59,7 +59,13 @@ class RealTimeTranslation:
 
     async def get_index(self, request: Request):
         try:
-            return self.templates.TemplateResponse("index.html", {"request": request})
+            js_file_version = generate_version(os.path.join('/app/static/js/', 'main.js'))
+            css_file_version = generate_version(os.path.join('/app/static/css/', 'styles.css'))
+            return self.templates.TemplateResponse("index.html",
+                                                   {"request": request,
+                                                    "css_file_version": css_file_version,
+                                                    "js_file_version": js_file_version
+                                                    })
         except FileNotFoundError:
             return HTMLResponse(content="index.html not found", status_code=404)
 
