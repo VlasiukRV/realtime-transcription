@@ -1,3 +1,5 @@
+from abc import ABC, abstractmethod
+
 import asyncio
 import threading
 import time
@@ -8,7 +10,31 @@ from app.config import ASSEMBLYAI_API_KEY
 # Load AssemblyAI API key from environment variable for security
 aai.settings.api_key = ASSEMBLYAI_API_KEY
 
-class Transcriber:
+from abc import ABC, abstractmethod
+
+class ITranscriber(ABC):
+    @abstractmethod
+    def start(self):
+        """Start transcription process."""
+        pass
+
+    @abstractmethod
+    def stop(self):
+        """Stop transcription process."""
+        pass
+
+    @abstractmethod
+    def get_status(self):
+        """Get current status."""
+        pass
+
+    @abstractmethod
+    def set_transcription_handler(self, handler):
+        """Set the handler for transcription data."""
+        pass
+
+
+class Transcriber(ITranscriber):
     def __init__(self, sample_rate=16_000, _handle_transcription=None):
         """Initialize the Transcriber with a custom handle_transcription function."""
         self.status = "off"
@@ -24,24 +50,20 @@ class Transcriber:
         """Initialize the RealtimeTranscriber object."""
         self.transcriber = aai.RealtimeTranscriber(
             sample_rate=self.sample_rate,
-            on_data=self.realtime_transcriber_on_data,
-            on_error=self.realtime_transcriber_on_error,
-            on_open=self.realtime_transcriber_on_open,
-            on_close=self.realtime_transcriber_on_close,
+            on_data=self._realtime_transcriber_on_data,
+            on_error=self._realtime_transcriber_on_error,
+            on_open=self._realtime_transcriber_on_open,
+            on_close=self._realtime_transcriber_on_close,
         )
 
-    async def add_to_buffer(self, data: str):
-        """Async method to handle transcription and send data to the buffer."""
-        if self.handle_transcription:
-            await self.handle_transcription(data)
-
-    def get_service_status(self):
-        return {"status": self.status, "status_message": self.status_message}
-
-    def realtime_transcriber_on_data(self, transcript: aai.RealtimeTranscript):
-        """Callback for processing transcription data."""
-        if self.running and isinstance(transcript, aai.RealtimeFinalTranscript):
-            asyncio.run(self.add_to_buffer(transcript.text))
+    def start(self):
+        """Start the transcription process in a separate thread."""
+        if self.transcription_thread is None or not self.transcription_thread.is_alive():
+            self.running = True
+            self.create_transcriber()
+            self.transcriber.connect()
+            self.transcription_thread = threading.Thread(target=self._transcribe_in_thread, daemon=True)
+            self.transcription_thread.start()
 
     def stop(self):
         """Close the transcriber and stop the microphone stream."""
@@ -55,7 +77,25 @@ class Transcriber:
             self.transcription_thread = None
             self._set_status_message("Transcriber stopped.")
 
-    def transcribe(self):
+    def get_status(self):
+        return {"status": self.status, "status_message": self.status_message}
+
+    def set_transcription_handler(self, handler):
+        """Set a custom handler for transcription data."""
+        self.handle_transcription = handler
+
+    def _transcribe_in_thread(self):
+        """Internal method to run transcription in a separate thread."""
+        try:
+            self._transcribe()
+            self._set_status_message("Transcription thread started.")
+        except Exception as e:
+            self._set_status_message(f"Error in transcription thread: {e}")
+        finally:
+            self.transcription_thread = None
+            self._set_status_message("Transcription thread finished.")
+
+    def _transcribe(self):
         """Start transcription."""
         try:
             self.status = "on"
@@ -69,40 +109,29 @@ class Transcriber:
             # Explicitly stop transcription and cleanup
             self.stop()
 
-    def run(self):
-        """Start the transcription process in a separate thread."""
-        if self.transcription_thread is None or not self.transcription_thread.is_alive():
-            self.running = True
-            self.create_transcriber()
-            self.transcriber.connect()
-            self.transcription_thread = threading.Thread(target=self._transcribe_in_thread, daemon=True)
-            self.transcription_thread.start()
-
     @staticmethod
-    def realtime_transcriber_on_open(session_opened: aai.RealtimeSessionOpened):
+    def _realtime_transcriber_on_open(session_opened: aai.RealtimeSessionOpened):
         """Callback for when the session is opened."""
         logger.info(f"AssemblyAI Session started: {session_opened.session_id}")
 
     @staticmethod
-    def realtime_transcriber_on_error(error: aai.RealtimeError):
+    def _realtime_transcriber_on_error(error: aai.RealtimeError):
         """Callback for handling errors."""
         logger.error(f"An error occurred: {error}")
 
     @staticmethod
-    def realtime_transcriber_on_close():
+    def _realtime_transcriber_on_close():
         """Callback for when the session is closed."""
         logger.info("AssemblyAI session closed.")
 
-    def _transcribe_in_thread(self):
-        """Internal method to run transcription in a separate thread."""
-        try:
-            self.transcribe()
-            self._set_status_message("Transcription thread started.")
-        except Exception as e:
-            self._set_status_message(f"Error in transcription thread: {e}")
-        finally:
-            self.transcription_thread = None
-            self._set_status_message("Transcription thread finished.")
+    def _realtime_transcriber_on_data(self, transcript: aai.RealtimeTranscript):
+        """Callback for processing transcription data."""
+        if self.running and isinstance(transcript, aai.RealtimeFinalTranscript):
+            asyncio.run(self._add_to_buffer(transcript.text))
+    async def _add_to_buffer(self, data: str):
+        """Async method to handle transcription and send data to the buffer."""
+        if self.handle_transcription:
+            await self.handle_transcription(data)
 
     def _set_status_message(self, message):
         logger.info(message)
