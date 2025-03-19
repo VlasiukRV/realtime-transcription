@@ -1,7 +1,7 @@
 import asyncio
 from fastapi import WebSocket, WebSocketDisconnect
 from app.utils import logger
-from services.web_socket_connection import WebSocketConnection
+from app.services.web_socket_connection import WebSocketConnection
 
 BOLD = "\033[1m"
 RESET = "\033[0m"

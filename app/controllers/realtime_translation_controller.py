@@ -1,5 +1,5 @@
 from fastapi import FastAPI, WebSocket
-from services.realtime_translation import RealTimeTranslation
+from app.services.realtime_translation import RealTimeTranslation
 from app.utils import logger
 import socket
 from typing import Dict
@@ -11,13 +11,7 @@ class RealTimeTranslationController:
         logger.info(f"Server hostname: {self.hostname}")
 
     def setup_routes(self, app: FastAPI) -> None:
-
         app.add_websocket_route("/ws/transcribe/{lang}", self.handle_language_websocket)
-
-    # API Endpoints for system state and worker management
-    async def get_system_state(self) -> Dict[str, str]:
-        transcriber_status = self.real_time_translation.transcriber.get_status() if self.real_time_translation.transcriber else "Not Running"
-        return {"transcriber_status": transcriber_status}
 
     # WebSocket for language-specific transcription
     async def handle_language_websocket(self, websocket: WebSocket) -> None:

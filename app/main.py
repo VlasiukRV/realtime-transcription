@@ -5,6 +5,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
 from app.services.realtime_translation import RealTimeTranslation
+from app.services.translators.translator import TranslatorType
 from app.controllers.realtime_translation_controller import RealTimeTranslationController
 from app.controllers.http_controller import HTTPController
 from app.controllers.websocket_controller import WebsocketController
@@ -16,22 +17,22 @@ def create_app():
     application = FastAPI(title="RealTime-transcription", version="1.0.1")
 
     # Mount static files
-    application.mount("/static", StaticFiles(directory="app"), name="static")
+    application.mount("/static", StaticFiles(directory="app/static"), name="static")
 
     templates = Jinja2Templates(directory="app/templates")
 
     # Initialize services
-    real_time_translation = RealTimeTranslation()
+    real_time_translation = RealTimeTranslation(TranslatorType.GOOGLE)
 
     # Set up controllers
-    realtime_translation_controller = RealTimeTranslationController(real_time_translation)
-    realtime_translation_controller.setup_routes(application)
-
     http_controller = HTTPController(templates, real_time_translation)
     http_controller.setup_routes(application)
 
-    websocket_controller = WebsocketController(real_time_translation)
-    websocket_controller.setup_routes(application)
+    realtime_translation_controller = RealTimeTranslationController(real_time_translation)
+    realtime_translation_controller.setup_routes(application)
+
+    # websocket_controller = WebsocketController(real_time_translation)
+    # websocket_controller.setup_routes(application)
 
     return application
 

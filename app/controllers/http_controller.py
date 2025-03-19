@@ -1,7 +1,7 @@
 from fastapi import FastAPI, Request
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse, JSONResponse
-from services.realtime_translation import RealTimeTranslation, LangRequest
+from app.services.realtime_translation import RealTimeTranslation, LangRequest
 from app.utils import generate_version, logger
 import socket
 import os
@@ -54,9 +54,9 @@ class HTTPController:
             return HTMLResponse(content="settings.html not found", status_code=404)
 
     # API Endpoints for system state and worker management
-    async def get_system_state(self) -> Dict[str, str]:
+    async def get_system_state(self) -> JSONResponse:
         transcriber_status = self.real_time_translation.transcriber.get_status() if self.real_time_translation.transcriber else "Not Running"
-        return {"transcriber_status": transcriber_status}
+        return JSONResponse(content={"transcriber_status": transcriber_status})
 
     async def start_transcription_worker(self) -> JSONResponse:
         await self.real_time_translation.start_working_tasks()
@@ -69,7 +69,7 @@ class HTTPController:
     # API for adding new languages
     async def add_language(self, lang_request: LangRequest) -> JSONResponse:
         lang = lang_request.lang
-        if self.real_time_translation.add_language(lang):
+        if await self.real_time_translation.add_language(lang):
             return JSONResponse(content={"status": "success", "message": f"Language {lang} added."})
         else:
             return JSONResponse(content={"status": "error", "message": f"Error added Language {lang}"})

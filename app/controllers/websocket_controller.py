@@ -1,8 +1,8 @@
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import JSONResponse
-from services.realtime_translation import RealTimeTranslation, LangRequest
-from services.language_manager import LanguageManager
+from app.services.realtime_translation import RealTimeTranslation, LangRequest
+from app.services.language_manager import LanguageManager
 from app.utils import logger
 import socket
 

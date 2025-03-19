@@ -1,5 +1,5 @@
 import asyncio
-from services.web_socket_manager import WebSocketManager
+from app.services.web_socket_manager import WebSocketManager
 
 class LanguageManager:
     def __init__(self, lang: str, create_broadcast_task):

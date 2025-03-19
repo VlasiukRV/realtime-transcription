@@ -1,7 +1,7 @@
 
-from services.transcriber import Transcriber
-from services.translator import Translator
-from services.language_manager import LanguageManager
+from app.services.transcriber import  Transcriber
+from app.services.translators.translator import TranslatorFactory, TranslatorType
+from app.services.language_manager import LanguageManager
 from app.utils import logger
 
 from pydantic import BaseModel
@@ -14,11 +14,14 @@ class LangRequest(BaseModel):
 
 
 class RealTimeTranslation:
-    def __init__(self):
+    def __init__(self, translator_type: TranslatorType):
 
         # Initialize services
         self.transcriber = Transcriber(sample_rate=16000, _handle_transcription=self._handle_transcription)
-        self.translator = Translator()
+
+        translator_factory = TranslatorFactory()
+        translator_class = translator_factory.get_translator(translator_type)
+        self.translator = translator_class()
 
         self.lang_managers: dict[str, LanguageManager] = {}
 

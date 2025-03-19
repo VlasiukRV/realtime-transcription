@@ -1,12 +1,13 @@
 import aiohttp
-from app.utils import logger
 
+from app.utils import logger
 from app.config import GOOGLE_TRANSLATE_API_KEY
+from app.services.translators.translator import ITranslator
 
 google_translate_api_key = GOOGLE_TRANSLATE_API_KEY
 google_translate_url = "https://translation.googleapis.com/language/translate/v2"
 
-class Translator:
+class GoogleTranslator(ITranslator):
     def __init__(self):
         """
         Initializes a Translator object with an API key and a target language.
