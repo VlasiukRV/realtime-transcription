@@ -1,6 +1,6 @@
 from fastapi import WebSocket
 
-from app.services.transcriber import  Transcriber
+from app.services.transcribers.transcriber import  Transcriber
 from app.services.translators.translator import TranslatorFactory, TranslatorType
 from app.services.language_manager import LanguageManager
 from app.utils import logger

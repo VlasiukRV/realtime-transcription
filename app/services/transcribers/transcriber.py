@@ -10,8 +10,6 @@ from app.config import ASSEMBLYAI_API_KEY
 # Load AssemblyAI API key from environment variable for security
 aai.settings.api_key = ASSEMBLYAI_API_KEY
 
-from abc import ABC, abstractmethod
-
 class ITranscriber(ABC):
     @abstractmethod
     def start(self):

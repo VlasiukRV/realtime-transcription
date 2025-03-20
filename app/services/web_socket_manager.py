@@ -29,7 +29,7 @@ class WebSocketManager:
         """
         return len(self.active_clients) > 0
 
-    async def broadcast_messages(self):
+    async def start_message_broadcasting(self):
         """
         Broadcast messages to all connected clients.
         """
@@ -97,12 +97,6 @@ class WebSocketManager:
         """
         async with self.mutex_buffer:
             await self.buffer.put(text)
-
-    async def start_message_broadcasting(self):
-        """
-        Start broadcasting messages to all clients.
-        """
-        await self.broadcast_messages()
 
     async def stop_message_broadcasting(self):
         """

@@ -15,7 +15,7 @@ class LanguageManager:
         """
         if self.broadcast_task is None or self.broadcast_task.done():
             # If the task does not exist or has completed, create a new one
-            self.broadcast_task = asyncio.create_task(self.ws_manager.broadcast_messages())
+            self.broadcast_task = asyncio.create_task(self.ws_manager.start_message_broadcasting())
             logger.info(f"Broadcasting started for language {self.lang}")
         else:
             logger.info(f"Broadcasting is already running for language {self.lang}")
