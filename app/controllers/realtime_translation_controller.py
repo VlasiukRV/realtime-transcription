@@ -19,11 +19,12 @@ class RealTimeTranslationController:
         lang = ""
         try:
             lang = websocket.scope["path"].split("/")[3]
-            if lang not in self.real_time_translation.lang_managers:
-                logger.warning(f"Language '{lang}' not found. Closing WebSocket.")
+            if not lang:
+                logger.warning("Language not specified in the WebSocket path. Closing WebSocket.")
                 await websocket.close(code=1003)
-                return
-            await self.real_time_translation.lang_managers[lang].ws_manager.handle_connection(websocket)
+            if not await self.real_time_translation.handle_websocket_connection(lang, websocket):
+                logger.warning(f"Error handling websocket for language {lang}. Closing WebSocket.")
+                await websocket.close(code=1003)
         except Exception as e:
             logger.error(f"Error handling websocket for language {lang}: {e}")
             await websocket.close(code=1011)  # Code for internal server error

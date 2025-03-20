@@ -2,7 +2,7 @@ from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import JSONResponse
 from app.services.realtime_translation import RealTimeTranslation, LangRequest
-from app.services.language_manager import LanguageManager
+
 from app.utils import logger
 import socket
 
@@ -49,14 +49,8 @@ class WebsocketController:
     # API for adding new languages
     async def add_language(self, lang_request: LangRequest) -> JSONResponse:
         lang = lang_request.lang
-        if lang not in self.real_time_translation.lang_managers:
-            self.real_time_translation.lang_managers[lang] = LanguageManager(lang, self.start_broadcast_for_language)
-            logger.info(f"Language {lang} added successfully.")
+        if await self.real_time_translation.add_language(lang):
             return JSONResponse(content={"status": "success", "message": f"Language {lang} added."})
-        logger.warning(f"Language {lang} already exists.")
-        return JSONResponse(content={"status": "error", "message": f"Language {lang} already exists."})
-
-    # Helper function for broadcasting messages for a specific language
-    async def start_broadcast_for_language(self, lang: str) -> None:
-        await self.real_time_translation.lang_managers[lang].ws_manager.broadcast_messages()
+        else:
+            return JSONResponse(content={"status": "error", "message": f"Error added Language {lang}"})
 

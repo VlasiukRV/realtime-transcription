@@ -1,3 +1,4 @@
+from fastapi import WebSocket
 
 from app.services.transcriber import  Transcriber
 from app.services.translators.translator import TranslatorFactory, TranslatorType
@@ -25,27 +26,32 @@ class RealTimeTranslation:
 
         self.lang_managers: dict[str, LanguageManager] = {}
 
+    async def handle_websocket_connection(self, lang: str, websocket: WebSocket) -> bool:
+        if lang not in self.lang_managers:
+            return False
+
+        await self.lang_managers[lang].ws_manager.handle_connection(websocket)
+
+        return True
+
     async def add_language(self, lang: str) -> bool:
 
         if lang not in self.lang_managers:
-            self.lang_managers[lang] = LanguageManager(lang, self.start_broadcast_for_language)
+            lang_manager = LanguageManager(lang)
+            await lang_manager.start_broadcasting()
+
+            self.lang_managers[lang] = lang_manager
             logger.info(f"Language {lang} added successfully.")
             return True
 
         logger.warning(f"Language {lang} already exists.")
         return False
 
-    async def start_broadcast_for_language(self, lang: str) -> None:
-        await self.lang_managers[lang].ws_manager.broadcast_messages()
-
-    async def create_broadcast_task(self, lang: str):
-        await self.lang_managers[lang].ws_manager.broadcast_messages()
-
     async def start_working_tasks(self):
         logger.info("Starting transcription and broadcasting tasks...")
         self.transcriber.start()
         for lang in self.lang_managers:
-            self.lang_managers[lang].broadcast_task = asyncio.create_task(self.create_broadcast_task(lang))
+            await self.lang_managers[lang].start_broadcasting()
 
     async def stop_working_tasks(self):
         logger.info("Stopping transcription and broadcasting tasks...")
