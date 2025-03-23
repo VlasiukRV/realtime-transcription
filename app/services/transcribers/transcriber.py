@@ -76,7 +76,7 @@ class Transcriber(ITranscriber):
             self._set_status_message("Transcriber stopped.")
 
     def get_status(self):
-        return {"status": self.status, "status_message": self.status_message}
+        return {"status": self.status, "message": self.status_message}
 
     def set_transcription_handler(self, handler):
         """Set a custom handler for transcription data."""
@@ -110,7 +110,7 @@ class Transcriber(ITranscriber):
     @staticmethod
     def _realtime_transcriber_on_open(session_opened: aai.RealtimeSessionOpened):
         """Callback for when the session is opened."""
-        logger.info(f"AssemblyAI Session started: {session_opened.session_id}")
+        logger.info(f"\033[33mAssemblyAI Session started: {session_opened.session_id}\033[0m")
 
     @staticmethod
     def _realtime_transcriber_on_error(error: aai.RealtimeError):

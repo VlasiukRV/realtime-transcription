@@ -48,13 +48,13 @@ class RealTimeTranslation:
         return False
 
     async def start_working_tasks(self):
-        logger.info("Starting transcription and broadcasting tasks...")
+        logger.info("\033[33mStarting transcription and broadcasting tasks...\033[0m")
         self.transcriber.start()
         for lang in self.lang_managers:
             await self.lang_managers[lang].start_broadcasting()
 
     async def stop_working_tasks(self):
-        logger.info("Stopping transcription and broadcasting tasks...")
+        logger.info("\033[33mStopping transcription and broadcasting tasks...\033[0m")
         for lang in list(self.lang_managers.keys()):
             await self.lang_managers[lang].stop()
         self.lang_managers.clear()

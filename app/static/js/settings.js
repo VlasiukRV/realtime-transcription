@@ -1,17 +1,27 @@
 (function () {
-// const service_status_output = document.getElementById('service-status-output');
-//
-// const eventSource = new EventSource("/api/status");
-//
-// eventSource.onmessage = function (event) {
-//     service_status_output.innerHTML = JSON.stringify(event.data, null, 2);
-// };
-//
-// eventSource.onerror = function (error) {
-//     console.log("Ошибка SSE:", error);
-// };
+    const messageTemplate = `<h2>Status: {status}</h2><p id="message">{message}</p>`;
 
-// Adding a click event listener to the "startButton"
+    function renderMessage(response_json) {
+        let message_template_html = messageTemplate
+            .replace('{status}', response_json.transcriber_status)
+            .replace('{message}', response_json.message);
+
+        document.getElementById('state_json').innerHTML = message_template_html
+    }
+
+    // const service_status_output = document.getElementById('service-status-output');
+    //
+    // const eventSource = new EventSource("/api/status");
+    //
+    // eventSource.onmessage = function (event) {
+    //     service_status_output.innerHTML = JSON.stringify(event.data, null, 2);
+    // };
+    //
+    // eventSource.onerror = function (error) {
+    //     console.log("Ошибка SSE:", error);
+    // };
+
+    // Adding a click event listener to the "startButton"
     document.getElementById('startButton').addEventListener('click', async () => {
         try {
             // Sending a POST request to the 'api/start' endpoint
@@ -24,9 +34,9 @@
 
             if (response.ok) {
                 // If the response is successful, display the response text
-                let text;
-                text = await response.text();
-                document.getElementById('responseMessage').innerHTML = text;
+                let response_json;
+                response_json = await response.json();
+                renderMessage(response_json);
             } else {
                 // If the response is not successful, show an error message
                 document.getElementById('responseMessage').innerHTML = "Error starting the worker.";
@@ -37,7 +47,7 @@
         }
     });
 
-// Adding a click event listener to the "stopButton"
+    // Adding a click event listener to the "stopButton"
     document.getElementById('stopButton').addEventListener('click', async () => {
         try {
             // Sending a POST request to the 'api/stop' endpoint
@@ -50,9 +60,9 @@
 
             if (response.ok) {
                 // If the response is successful, display the response text
-                let text;
-                text = await response.text();
-                document.getElementById('responseMessage').innerHTML = text;
+                let response_json;
+                response_json = await response.json();
+                renderMessage(response_json);
             } else {
                 // If the response is not successful, show an error message
                 document.getElementById('responseMessage').innerHTML = "Error stopping the worker.";
@@ -62,7 +72,6 @@
             document.getElementById('responseMessage').innerHTML = "Connection error with the server.";
         }
     });
-
 
     window.onload = async function () {
 
@@ -77,9 +86,9 @@
 
             if (response.ok) {
                 // If the response is successful, display the response text
-                let text;
-                text = await response.text();
-                document.getElementById('state_json').innerHTML = text;
+                let response_json;
+                response_json = await response.json();
+                renderMessage(response_json);
             } else {
                 // If the response is not successful, show an error message
                 document.getElementById('state_json').innerHTML = "Error stopping the worker.";

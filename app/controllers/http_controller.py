@@ -48,28 +48,36 @@ class HTTPController:
 
     async def render_admin_page(self, request: Request) -> HTMLResponse:
         try:
-            return self.templates.TemplateResponse("settings.html", {"request": request})
+            versions = get_static_file_versions_for_admin_page()
+            return self.templates.TemplateResponse("settings.html", {
+                "request": request,
+                **versions
+            })
         except FileNotFoundError:
             logger.error("settings.html not found")
             return HTMLResponse(content="settings.html not found", status_code=404)
 
     # API Endpoints for system state and worker management
     async def get_system_state(self) -> JSONResponse:
-        transcriber_status = self.real_time_translation.transcriber.get_status() if self.real_time_translation.transcriber else "Not Running"
-        return JSONResponse(content={"transcriber_status": transcriber_status})
+        transcriber_status = self.real_time_translation.transcriber.get_status() if self.real_time_translation.transcriber else {"status": "error", "message": "Not Running"}
+        return JSONResponse(content={"transcriber_status": transcriber_status["status"], "message":transcriber_status["message"]})
 
     async def start_transcription_worker(self) -> JSONResponse:
         await self.real_time_translation.start_working_tasks()
-        return JSONResponse(content={"status": "success", "message": "Worker started!"})
+        data = {"transcriber_status": "success", "message": f"Worker started!"}
+        return JSONResponse(content=data, status_code=200)
 
     async def stop_transcription_worker(self) -> JSONResponse:
         await self.real_time_translation.stop_working_tasks()
-        return JSONResponse(content={"status": "success", "message": "Worker stopped!"})
+        data = {"transcriber_status": "success", "message": f"Worker stopped!"}
+        return JSONResponse(content=data, status_code=200)
 
     # API for adding new languages
     async def add_language(self, lang_request: LangRequest) -> JSONResponse:
         lang = lang_request.lang
         if await self.real_time_translation.add_language(lang):
-            return JSONResponse(content={"status": "success", "message": f"Language {lang} added."})
+            data = {"transcriber_status": "success", "message": f"Language {lang} added."}
         else:
-            return JSONResponse(content={"status": "error", "message": f"Error added Language {lang}"})
+            data = {"transcriber_status": "error", "message": f"Error added Language {lang}"}
+
+        return JSONResponse(content=data, status_code=200)
