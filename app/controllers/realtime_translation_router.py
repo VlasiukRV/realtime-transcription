@@ -2,19 +2,18 @@ from fastapi import FastAPI, WebSocket
 from app.services.realtime_translation import RealTimeTranslation
 from app.utils import logger
 import socket
-from typing import Dict
 
-class RealTimeTranslationController:
+class RealTimeTranslationRouter:
     def __init__(self, real_time_translation: RealTimeTranslation):
         self.real_time_translation = real_time_translation
         self.hostname = socket.gethostname()
         logger.info(f"Server hostname: {self.hostname}")
 
     def setup_routes(self, app: FastAPI) -> None:
-        app.add_websocket_route("/ws/transcribe/{lang}", self.handle_language_websocket)
+        app.add_websocket_route("/ws/transcribe/{lang}", self.handle_lang_transcription_websocket)
 
     # WebSocket for language-specific transcription
-    async def handle_language_websocket(self, websocket: WebSocket) -> None:
+    async def handle_lang_transcription_websocket(self, websocket: WebSocket) -> None:
 
         lang = ""
         try:

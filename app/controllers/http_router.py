@@ -18,7 +18,7 @@ def get_static_file_versions_for_admin_page() -> Dict[str, str]:
     css_file_version = generate_version(os.path.join('/app/static/css/', 'styles.css'))
     return {"js_file_version": js_file_version, "css_file_version": css_file_version}
 
-class HTTPController:
+class HTTPRouter:
     def __init__(self, templates: Jinja2Templates, real_time_translation: RealTimeTranslation):
         self.real_time_translation = real_time_translation
         self.templates = templates

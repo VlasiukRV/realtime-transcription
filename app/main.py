@@ -6,9 +6,9 @@ from fastapi.templating import Jinja2Templates
 
 from app.services.realtime_translation import RealTimeTranslation
 from app.services.translators.translator import TranslatorType
-from app.controllers.realtime_translation_controller import RealTimeTranslationController
-from app.controllers.http_controller import HTTPController
-from app.controllers.websocket_controller import WebsocketController
+from app.controllers.realtime_translation_router import RealTimeTranslationRouter
+from app.controllers.http_router import HTTPRouter
+from app.controllers.websocket_router import WebsocketRouter
 
 from app.config import UVICORN_HOST
 from app.config import UVICORN_PORT
@@ -25,11 +25,11 @@ def create_app():
     real_time_translation = RealTimeTranslation(TranslatorType.GOOGLE)
 
     # Set up controllers
-    http_controller = HTTPController(templates, real_time_translation)
-    http_controller.setup_routes(application)
+    http_router = HTTPRouter(templates, real_time_translation)
+    http_router.setup_routes(application)
 
-    realtime_translation_controller = RealTimeTranslationController(real_time_translation)
-    realtime_translation_controller.setup_routes(application)
+    realtime_translation_router = RealTimeTranslationRouter(real_time_translation)
+    realtime_translation_router.setup_routes(application)
 
     # websocket_controller = WebsocketController(real_time_translation)
     # websocket_controller.setup_routes(application)

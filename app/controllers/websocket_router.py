@@ -7,7 +7,7 @@ from app.utils import logger
 import socket
 
 
-class WebsocketController:
+class WebsocketRouter:
     def __init__(self, real_time_translation: RealTimeTranslation):
         self.real_time_translation = real_time_translation
         self.templates = Jinja2Templates(directory="app/templates")
