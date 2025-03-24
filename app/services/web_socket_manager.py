@@ -1,10 +1,11 @@
 import asyncio
-from fastapi import WebSocket, WebSocketDisconnect
+from fastapi import WebSocket
 from app.utils import logger
 from app.services.web_socket_connection import WebSocketConnection
 
 BOLD = "\033[1m"
 RESET = "\033[0m"
+
 
 class WebSocketManager:
     def __init__(self):
@@ -39,7 +40,6 @@ class WebSocketManager:
             await asyncio.sleep(1)
             await self._broadcast_messages_logic()
 
-
     async def _broadcast_messages_logic(self):
         text = await self._get_message_from_queue()
 
@@ -72,22 +72,12 @@ class WebSocketManager:
 
         :param websocket: WebSocket instance representing the client connection.
         """
-        await websocket.accept()
+        connection = WebSocketConnection(websocket, disconnect_func=self.disconnect_client)
 
-        connection = WebSocketConnection(websocket)
         async with self.mutex_active_clients:
             self.active_clients.add(connection)  # Add client to the active clients list
 
-        try:
-            while True:
-                message = await connection.receive_message()
-                if message is None:
-                    break  # Break if the connection is closed
-                # Additional logic to process messages from the client
-        except WebSocketDisconnect:
-            logger.info("Client disconnected.")
-        finally:
-            await self.disconnect_client(connection)
+        await connection.accept()
 
     async def enqueue_message(self, text: str):
         """

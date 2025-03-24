@@ -1,10 +1,12 @@
-assemblyai==0.34.0
+assemblyai
 streamlit==1.38.0
-aiohttp==3.11.2
+aiohttp
 google-cloud-translate==3.18.0
-fastapi~=0.115.5
+fastapi
 uvicorn
 jinja2==3.1.4
 sse_starlette
 sse-starlette~=2.2.0
-starlette~=0.42.0
+starlette
+pydantic
+python-dotenv
