@@ -20,11 +20,12 @@ class ITranslator(ABC):
 class TranslatorFactory:
 
     def get_translator(self, translator_type: TranslatorType) -> Type[ITranslator]:
-        from app.services.translators.translator_google import GoogleTranslator
-        return GoogleTranslator
+        from app.services.translators.translator_google import GoogleTranslator_HTTP
+
+        return GoogleTranslator_HTTP
 
         # if translator_type == TranslatorType.GOOGLE:
         #
-        #    return GoogleTranslator
+        #    return GoogleTranslator_HTTP
         #else:
         #    raise ValueError(f"Unknown translator type: {translator_type}")

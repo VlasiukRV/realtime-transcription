@@ -37,7 +37,7 @@ class RealTimeTranslation:
         if lang not in self.lang_managers:
             return False
 
-        await self.lang_managers[lang].ws_manager.handle_connection(websocket)
+        await self.lang_managers[lang].ws_broadcast_manager.handle_connection(websocket)
         return True
 
     async def add_language(self, lang: str) -> bool:
@@ -92,4 +92,4 @@ class RealTimeTranslation:
             text=transcription_text,
             target_language=lang
         )
-        await self.lang_managers[lang].ws_manager.enqueue_message(translated_text)
+        await self.lang_managers[lang].ws_broadcast_manager.enqueue_message(translated_text)

@@ -7,7 +7,7 @@ from app.services.translators.translator import ITranslator
 google_translate_api_key = GOOGLE_TRANSLATE_API_KEY
 google_translate_url = "https://translation.googleapis.com/language/translate/v2"
 
-class GoogleTranslator(ITranslator):
+class GoogleTranslator_HTTP(ITranslator):
     def __init__(self):
         """
         Initializes a Translator object with an API key and a target language.
