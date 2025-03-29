@@ -4,12 +4,10 @@ from typing import Dict
 from starlette.templating import Jinja2Templates
 
 from app.services.realtime_translation import RealTimeTranslation
-from app.services.translators.translator import TranslatorType
 from app.utils import generate_version
 
-
 def get_real_time_translation() -> RealTimeTranslation:
-    return RealTimeTranslation(TranslatorType.GOOGLE)
+    return RealTimeTranslation()
 
 def get_jinja_template()-> Jinja2Templates:
     return Jinja2Templates(directory="app/templates")

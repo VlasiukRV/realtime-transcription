@@ -29,7 +29,7 @@ class WebSocketConnection:
             await self.websocket.accept()  # Accept the WebSocket connection
             self.is_open = True
             logger.info(f"{BOLD}WebSocket connection accepted for {self.client_ip}:{self.client_port}{RESET}")
-            await self._process_messages()
+            await self.__process_messages()
         except WebSocketDisconnect:
             self.is_open = False
             logger.info("Client disconnected.")
@@ -38,20 +38,6 @@ class WebSocketConnection:
             logger.error(f"Error accepting WebSocket connection: {e}")
         finally:
             await self.close()
-
-    async def _process_messages(self):
-        """
-        Process incoming messages from the client.
-        """
-        try:
-            while self.is_open:
-                message = await self.receive_message()
-                if message and self.on_message_func:
-                    self.on_message_func(message)
-        except WebSocketDisconnect:
-            self.is_open = False
-        except Exception as e:
-            self.is_open = False
 
     async def send_message(self, message: str):
         """
@@ -89,3 +75,17 @@ class WebSocketConnection:
             except Exception as e:
                 logger.error(f"Error closing WebSocket connection: {e}")
             self.disconnect_func(self)
+
+    async def __process_messages(self):
+        """
+        Process incoming messages from the client.
+        """
+        try:
+            while self.is_open:
+                message = await self.receive_message()
+                if message and self.on_message_func:
+                    self.on_message_func(message)
+        except WebSocketDisconnect:
+            self.is_open = False
+        except Exception:
+            self.is_open = False

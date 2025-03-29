@@ -1,9 +1,10 @@
-from fastapi import WebSocket
+from fastapi import WebSocket, Depends
 import asyncio
 from typing import Dict
 
+from app.services.dependencies import get_translator
 from app.services.transcribers.transcriber import Transcriber
-from app.services.translators.translator import TranslatorFactory, TranslatorType
+from app.services.translators.translator import ITranslator
 from app.services.language_manager import LanguageManager
 from app.utils import logger
 
@@ -15,14 +16,14 @@ class RealTimeTranslation:
             cls._instance = super().__new__(cls)
         return cls._instance
 
-    def __init__(self, translator_type: 'TranslatorType'):
+    def __init__(self,
+                 translator: ITranslator = Depends(get_translator)
+    ):
         # Initialize services
         if not hasattr(self, 'initialized'):  # Protecting from re-initialization
             self.transcriber = Transcriber(sample_rate=16000, _handle_transcription=self._handle_transcription)
 
-            translator_factory = TranslatorFactory()
-            translator_class = translator_factory.get_translator(translator_type)
-            self.translator = translator_class()
+            self.translator = translator
 
             self.lang_managers: Dict[str, LanguageManager] = {}
 

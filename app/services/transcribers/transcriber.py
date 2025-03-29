@@ -44,21 +44,12 @@ class Transcriber(ITranscriber):
         self.running = False
         self.transcription_thread = None
 
-    def create_transcriber(self):
-        """Initialize the RealtimeTranscriber object."""
-        self.transcriber = aai.RealtimeTranscriber(
-            sample_rate=self.sample_rate,
-            on_data=self._realtime_transcriber_on_data,
-            on_error=self._realtime_transcriber_on_error,
-            on_open=self._realtime_transcriber_on_open,
-            on_close=self._realtime_transcriber_on_close,
-        )
-
     def start(self):
         """Start the transcription process in a separate thread."""
         if self.transcription_thread is None or not self.transcription_thread.is_alive():
             self.running = True
-            self.create_transcriber()
+            self._create_transcriber()
+
             self.transcriber.connect()
             self.transcription_thread = threading.Thread(target=self._transcribe_in_thread, daemon=True)
             self.transcription_thread.start()
@@ -81,6 +72,16 @@ class Transcriber(ITranscriber):
     def set_transcription_handler(self, handler):
         """Set a custom handler for transcription data."""
         self.handle_transcription = handler
+
+    def _create_transcriber(self):
+        """Initialize the RealtimeTranscriber object."""
+        self.transcriber = aai.RealtimeTranscriber(
+            sample_rate=self.sample_rate,
+            on_data=self._realtime_transcriber_on_data,
+            on_error=self._realtime_transcriber_on_error,
+            on_open=self._realtime_transcriber_on_open,
+            on_close=self._realtime_transcriber_on_close,
+        )
 
     def _transcribe_in_thread(self):
         """Internal method to run transcription in a separate thread."""
@@ -126,6 +127,7 @@ class Transcriber(ITranscriber):
         """Callback for processing transcription data."""
         if self.running and isinstance(transcript, aai.RealtimeFinalTranscript):
             asyncio.run(self._add_to_buffer(transcript.text))
+
     async def _add_to_buffer(self, data: str):
         """Async method to handle transcription and send data to the buffer."""
         if self.handle_transcription:

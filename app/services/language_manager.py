@@ -1,17 +1,17 @@
 import asyncio
-from app.services.web_socket_manager import WebSocketManager
+from app.services.web_socket_manager import WebSocketBroadcastManager
 from app.utils import logger
 
 class LanguageManager:
     def __init__(self, lang: str):
         self.lang = lang
-        self.ws_manager = WebSocketManager()  # Initialize WebSocket manager
+        self.ws_manager = WebSocketBroadcastManager()  # Initialize WebSocket manager
         self.broadcast_task = None  # Initially, the broadcasting task is not started
 
     async def start_broadcasting(self):
         """
         Method to start broadcasting messages.
-        Creates a task for broadcasting messages through WebSocketManager.
+        Creates a task for broadcasting messages through WebSocketBroadcastManager.
         """
         if self.broadcast_task is None or self.broadcast_task.done():
             # If the task does not exist or has completed, create a new one

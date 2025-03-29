@@ -48,7 +48,7 @@ async def render_settings_page(
         return HTMLResponse(content="settings.html not found", status_code=404)
 
 @router.post("/api/addLang")
-async def add_language(
+async def api_add_language_to_transcription_worker(
     lang_request: LangRequest,
     real_time_translation: RealTimeTranslation = Depends(get_real_time_translation)
 ) -> JSONResponse:
@@ -61,7 +61,7 @@ async def add_language(
     return JSONResponse(content=data, status_code=200)
 
 @router.post("/api/start")
-async def start_transcription_worker(
+async def api_start_transcription_worker(
     real_time_translation: RealTimeTranslation = Depends(get_real_time_translation)
 ) -> JSONResponse:
     await real_time_translation.start_working_tasks()
@@ -69,7 +69,7 @@ async def start_transcription_worker(
     return JSONResponse(content=data, status_code=200)
 
 @router.post("/api/stop")
-async def stop_transcription_worker(
+async def api_stop_transcription_worker(
     real_time_translation: RealTimeTranslation = Depends(get_real_time_translation)
 ) -> JSONResponse:
     await real_time_translation.stop_working_tasks()
@@ -78,7 +78,7 @@ async def stop_transcription_worker(
 
 @router.get("/api/stop")
 # API Endpoints for system state and worker management
-async def get_system_state(
+async def api_get_system_state(
     real_time_translation: RealTimeTranslation = Depends(get_real_time_translation)
 ) -> JSONResponse:
     transcriber_status = real_time_translation.transcriber.get_status() if real_time_translation.transcriber else {

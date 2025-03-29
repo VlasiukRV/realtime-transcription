@@ -7,10 +7,10 @@ BOLD = "\033[1m"
 RESET = "\033[0m"
 
 
-class WebSocketManager:
+class WebSocketBroadcastManager:
     def __init__(self):
         """
-        Initialize WebSocketManager to manage client connections.
+        Initialize WebSocketBroadcastManager to manage client connections.
         """
         self.active_clients = set()
         self.mutex_active_clients = asyncio.Lock()  # Mutex for managing active clients
