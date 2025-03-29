@@ -5,8 +5,9 @@ from typing import Dict
 from app.services.dependencies import get_translator
 from app.services.transcribers.transcriber import Transcriber
 from app.services.translators.translator import ITranslator
-from app.services.language_manager import LanguageManager
+from app.services.language_manager import LanguageBroadcastManager
 from app.utils import logger
+from services.web_socket_broadcast_manager import WebSocketBroadcastManager
 
 class RealTimeTranslation:
     _instance = None
@@ -25,7 +26,7 @@ class RealTimeTranslation:
 
             self.translator = translator
 
-            self.lang_managers: Dict[str, LanguageManager] = {}
+            self.lang_managers: Dict[str, LanguageBroadcastManager] = {}
 
             # Mark as initialized
             self.initialized = True
@@ -37,7 +38,8 @@ class RealTimeTranslation:
         if lang not in self.lang_managers:
             return False
 
-        await self.lang_managers[lang].ws_broadcast_manager.handle_connection(websocket)
+        broadcast_manager = self.__get_broadcast_manager(lang)
+        await broadcast_manager.handle_connection(websocket)
         return True
 
     async def add_language(self, lang: str) -> bool:
@@ -45,7 +47,7 @@ class RealTimeTranslation:
         Add a new language for translation and processing.
         """
         if lang not in self.lang_managers:
-            lang_manager = LanguageManager(lang)
+            lang_manager = LanguageBroadcastManager(lang)
             await lang_manager.start_broadcasting()
 
             self.lang_managers[lang] = lang_manager
@@ -62,7 +64,8 @@ class RealTimeTranslation:
         logger.info("\033[33mStarting transcription and broadcasting tasks...\033[0m")
         self.transcriber.start()
         for lang in self.lang_managers:
-            await self.lang_managers[lang].start_broadcasting()
+            language_manager = self.__get_language_manager(lang)
+            await language_manager.start_broadcasting()
 
     async def stop_working_tasks(self):
         """
@@ -70,7 +73,8 @@ class RealTimeTranslation:
         """
         logger.info("\033[33mStopping transcription and broadcasting tasks...\033[0m")
         for lang in list(self.lang_managers.keys()):
-            await self.lang_managers[lang].stop()
+            language_manager = self.__get_language_manager(lang)
+            await language_manager.stop()
         self.lang_managers.clear()
         if self.transcriber:
             self.transcriber.stop()
@@ -92,4 +96,11 @@ class RealTimeTranslation:
             text=transcription_text,
             target_language=lang
         )
-        await self.lang_managers[lang].ws_broadcast_manager.enqueue_message(translated_text)
+        broadcast_manager = self.__get_broadcast_manager(lang)
+        await broadcast_manager.enqueue_message(translated_text)
+
+    def __get_broadcast_manager(self, lang: str) -> WebSocketBroadcastManager:
+        return self.lang_managers[lang].ws_broadcast_manager
+
+    def __get_language_manager(self, lang: str) -> LanguageBroadcastManager:
+        return self.lang_managers[lang]

@@ -1,6 +1,7 @@
 import json
 from fastapi import WebSocket, WebSocketDisconnect
 from app.utils import logger
+from typing import Callable, Optional
 
 BOLD = "\033[1m"
 RESET = "\033[0m"
@@ -8,8 +9,8 @@ RESET = "\033[0m"
 class WebSocketConnection:
     def __init__(self,
                  websocket: WebSocket,
-                 disconnect_func = None,
-                 on_message_func = None
+                 disconnect_func: Optional[Callable[['WebSocketConnection'], None]] = None,
+                 on_message_func: Optional[Callable[[str], None]] = None
     ):
         """
         Initialize the WebSocket connection for a specific client.
@@ -86,6 +87,4 @@ class WebSocketConnection:
                 if message and self.on_message_func:
                     self.on_message_func(message)
         except WebSocketDisconnect:
-            self.is_open = False
-        except Exception:
             self.is_open = False

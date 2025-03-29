@@ -7,7 +7,7 @@ from app.utils import logger
 from services.dependencies import get_ws_broadcast_manager
 
 
-class LanguageManager:
+class LanguageBroadcastManager:
     def __init__(self,
                  lang: str,
                  ws_broadcast_manager: WebSocketBroadcastManager = Depends(get_ws_broadcast_manager)
