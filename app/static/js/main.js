@@ -287,10 +287,43 @@
         $footer.append($clearButton, $pauseButton, $settingsButton);
     }
 
+    async function fetchLanguages() {
+      try {
+        const response = await fetch('/api/languages');
+
+        if (!response.ok) {
+          throw new Error('Failed to fetch languages');
+        }
+        const languages = await response.json();
+
+        languagesDb = languages.map(languageCode => {
+          return { value: languageCode, text: languageCode };
+        });
+
+      } catch (error) {
+        console.error('Error fetching languages:', error);
+      }
+    }
+
+    let wakeLock = null;
+
+    async function requestWakeLock() {
+        try {
+            wakeLock = await navigator.wakeLock.request('screen');
+            wakeLock.addEventListener('release', () => {
+                console.log('Wake Lock was released');
+            });
+            console.log('Wake Lock is active');
+        } catch (err) {
+            console.error(`${err.name}, ${err.message}`);
+        }
+    }
+
     // Initialize the page when it loads
-    $(document).ready(function () {
+    $(document).ready(async function () {
         createFooterButtons();
         setThemeFromLocalStorage(); // Set theme based on localStorage
+        await fetchLanguages()
 
         let lang = localStorage.getItem('selectedLanguage') || 'ru'; // Default language is 'ru' if none is stored
         createLanguageSelect(languagesDb, lang); // Create language select dropdown
@@ -303,5 +336,7 @@
         // Connect to WebSocket with the saved language
 
         $toggleThemeBtn.on('click', toggleTheme); // Add event listener for the theme toggle button
+        requestWakeLock();
+
     });
 })();

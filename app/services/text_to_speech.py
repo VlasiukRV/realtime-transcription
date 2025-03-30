@@ -20,6 +20,16 @@ class GoogleTextToSpeech:
             credentials=service_account.Credentials.from_service_account_file(key_path)
         )
 
+    def get_languages(self):
+        voices = self.client.list_voices()
+
+        language_codes = set()
+        for voice in voices.voices:
+            for language_code in voice.language_codes:
+                language_codes.add(language_code)
+
+        return sorted(list(language_codes))
+
     async def text_to_speech(self, text: str, language_code: str):
         audio_content = self.synthesize_speech(text, language_code)
         await asyncio.sleep(1)
@@ -49,8 +59,8 @@ class GoogleTextToSpeech:
 
         voice = texttospeech.VoiceSelectionParams(
             language_code=language_code,
-            ssml_gender=self._get_ssml_gender(ssml_gender),
-            name=voice_name
+            ssml_gender=self._get_ssml_gender(ssml_gender)
+            #,name=voice_name
         )
 
         # Set up the audio configuration

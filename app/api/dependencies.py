@@ -6,8 +6,8 @@ from starlette.templating import Jinja2Templates
 from app.services.realtime_translation import RealTimeTranslation
 from app.utils import generate_version
 from app.services.web_socket_broadcast_manager import WebSocketBroadcastManager
-from services.text_to_speech import GoogleTextToSpeech
-from services.translators.translator import ITranslator, TranslatorFactory
+from app.services.text_to_speech import GoogleTextToSpeech
+from app.services.translators.translator import ITranslator, TranslatorFactory
 
 
 def get_translator() -> ITranslator:

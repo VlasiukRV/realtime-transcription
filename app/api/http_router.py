@@ -4,13 +4,14 @@ from starlette.templating import Jinja2Templates
 
 from app.services.realtime_translation import RealTimeTranslation
 from app.api.dependencies import get_real_time_translation, get_jinja_template, get_static_file_versions_for_index_page, \
-    get_static_file_versions_for_admin_page, get_ws_broadcast_manager
+    get_static_file_versions_for_admin_page, get_ws_broadcast_manager, get_text_to_speech
 from app.utils import logger
 
 
 from pydantic import BaseModel
 
-from services.web_socket_broadcast_manager import WebSocketBroadcastManager
+from app.services.text_to_speech import GoogleTextToSpeech
+from app.services.web_socket_broadcast_manager import WebSocketBroadcastManager
 
 
 class LangRequest(BaseModel):
@@ -89,3 +90,8 @@ async def api_get_system_state(
     return JSONResponse(
         content={"transcriber_status": transcriber_status["status"], "message": transcriber_status["message"]})
 
+@router.get("/api/languages")
+def get_languages(
+        text_to_speech: GoogleTextToSpeech = Depends(get_text_to_speech)
+):
+    return JSONResponse(content=text_to_speech.get_languages(), status_code=200)

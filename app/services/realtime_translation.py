@@ -9,7 +9,7 @@ from app.services.translators.translator import ITranslator
 from app.services.language_manager import LanguageBroadcastManager
 from app.utils import logger
 from app.services.text_to_speech import GoogleTextToSpeech
-from services.web_socket_broadcast_manager import WebSocketBroadcastManager
+from app.services.web_socket_broadcast_manager import WebSocketBroadcastManager
 
 class RealTimeTranslation:
     _instance = None
