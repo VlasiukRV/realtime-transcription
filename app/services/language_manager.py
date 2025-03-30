@@ -1,16 +1,13 @@
 import asyncio
 
-from fastapi import Depends
-
 from app.services.web_socket_broadcast_manager import WebSocketBroadcastManager
 from app.utils import logger
-from services.dependencies import get_ws_broadcast_manager
 
 
 class LanguageBroadcastManager:
     def __init__(self,
                  lang: str,
-                 ws_broadcast_manager: WebSocketBroadcastManager = Depends(get_ws_broadcast_manager)
+                 ws_broadcast_manager: WebSocketBroadcastManager
         ):
         self.lang = lang
         self.ws_broadcast_manager = ws_broadcast_manager  # Initialize WebSocket manager

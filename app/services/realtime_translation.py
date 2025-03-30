@@ -1,12 +1,14 @@
+import json
+
 from fastapi import WebSocket, Depends
 import asyncio
 from typing import Dict
 
-from app.services.dependencies import get_translator
 from app.services.transcribers.transcriber import Transcriber
 from app.services.translators.translator import ITranslator
 from app.services.language_manager import LanguageBroadcastManager
 from app.utils import logger
+from app.services.text_to_speech import GoogleTextToSpeech
 from services.web_socket_broadcast_manager import WebSocketBroadcastManager
 
 class RealTimeTranslation:
@@ -18,13 +20,15 @@ class RealTimeTranslation:
         return cls._instance
 
     def __init__(self,
-                 translator: ITranslator = Depends(get_translator)
+                 translator: ITranslator,
+                 tts: GoogleTextToSpeech
     ):
         # Initialize services
         if not hasattr(self, 'initialized'):  # Protecting from re-initialization
             self.transcriber = Transcriber(sample_rate=16000, _handle_transcription=self._handle_transcription)
 
             self.translator = translator
+            self.tts = tts
 
             self.lang_managers: Dict[str, LanguageBroadcastManager] = {}
 
@@ -42,12 +46,12 @@ class RealTimeTranslation:
         await broadcast_manager.handle_connection(websocket)
         return True
 
-    async def add_language(self, lang: str) -> bool:
+    async def add_language(self, lang: str, ws_broadcast_manager: WebSocketBroadcastManager) -> bool:
         """
         Add a new language for translation and processing.
         """
         if lang not in self.lang_managers:
-            lang_manager = LanguageBroadcastManager(lang)
+            lang_manager = LanguageBroadcastManager(lang, ws_broadcast_manager)
             await lang_manager.start_broadcasting()
 
             self.lang_managers[lang] = lang_manager
@@ -94,10 +98,24 @@ class RealTimeTranslation:
         """
         translated_text = await self.translator.translate_text(
             text=transcription_text,
-            target_language=lang
+            language_code=lang
         )
+
+        audio_content = await self.tts.text_to_speech(
+             text=translated_text,
+             language_code=lang
+         )
+
+        message_data = {
+            "lang": lang,
+            "original_text": transcription_text,
+            "translated_text": translated_text,
+            "audio_content": audio_content
+        }
+        # message_json = json.dumps(message_data, ensure_ascii=False)
+
         broadcast_manager = self.__get_broadcast_manager(lang)
-        await broadcast_manager.enqueue_message(translated_text)
+        await broadcast_manager.enqueue_message(message_data)
 
     def __get_broadcast_manager(self, lang: str) -> WebSocketBroadcastManager:
         return self.lang_managers[lang].ws_broadcast_manager

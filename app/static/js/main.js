@@ -65,14 +65,81 @@
         socket.onerror = (error) => handleWebSocketError(error); // Handle WebSocket error event
     }
 
+    let isPlaying = false;  // A flag to track if audio is currently playing
+
+    function playAudio(audioBase64, callAfterEndPlaying) {
+        if (isPlaying) {
+            console.log("Audio is already playing. Please wait.");
+            return; // Exit the function if audio is already playing
+        }
+
+        // Set the flag to indicate that audio is playing
+        isPlaying = true;
+
+        // Create a Blob from the base64-encoded string
+        let audioBlob = new Blob([new Uint8Array(atob(audioBase64).split("").map(char => char.charCodeAt(0)))], {type: 'audio/mp3'});
+
+        // Create a URL for the audio Blob
+        let audioUrl = URL.createObjectURL(audioBlob);
+
+        // Create an HTMLAudioElement to play the audio
+        let audio = new Audio(audioUrl);
+
+        // Play the audio
+        audio.play().catch(error => {
+            console.error("Error playing the audio:", error);
+        });
+
+        // Listen for the "ended" event to know when the audio is finished
+        audio.onended = function () {
+            isPlaying = false; // Reset the flag when the audio finishes
+            callAfterEndPlaying()
+        };
+    }
+
+    async function getNextAudioContentWithDelay($element) {
+        let $next_element = $element.next();
+
+        if ($next_element.length > 0) {
+            return $next_element;
+        }
+
+        await new Promise(resolve => setTimeout(resolve, 1000));
+
+        return getNextAudioContentWithDelay($element);
+    }
+
+    async function playAudioFromElement($element) {
+
+        if ($element.attr('data-audio-content')) {
+            playAudio($element.attr('data-audio-content'), async function () {
+                $element.removeAttr('data-audio-content');
+                $element.addClass('played');
+
+                let $nextElement = await getNextAudioContentWithDelay($element);
+                playAudioFromElement($nextElement);
+            })
+        }
+    }
+
+    // Event listener for the button click
+    document.getElementById('playAudioButton').addEventListener('click', function () {
+        // Now you can play audio after the user clicks the button
+        $textDisplay.children().each(function (index, element) {
+            playAudioFromElement($(element))
+        });
+
+    });
+
     // Handle incoming WebSocket messages
     function handleWebSocketMessage(event) {
-        let message = event.data;
-        if (message.startsWith("Service Message:")) {
-            $serviceMessageOutput.append(`<p><strong>Service status:</strong> ${message.slice(17)}</p>`);
-        } else {
-            addText(event.data); // Add regular messages to the display
+        let jsonMessage = JSON.parse(event.data);
+
+        if (jsonMessage.translated_text) {
+            addText(jsonMessage); // Add regular messages to the display
         }
+        // $serviceMessageOutput.append(`<p><strong>Service status:</strong> ${message.slice(17)}</p>`);
+
     }
 
     // Handle WebSocket open event (connection established)
@@ -108,9 +175,12 @@
     }
 
     // Add text to the display with auto-scroll
-    function addText(text) {
+    function addText(jsonMessage) {
         if (!isPaused) { // Only add text if not paused
-            const newText = $('<p>').text(text);
+            const newText = $('<p>').text(jsonMessage.translated_text);
+            if (jsonMessage.audio_content) {
+                newText.attr('data-audio-content', jsonMessage.audio_content)
+            }
             $textDisplay.append(newText);
             $textDisplay.scrollTop($textDisplay[0].scrollHeight); // Auto-scroll to the bottom
         }

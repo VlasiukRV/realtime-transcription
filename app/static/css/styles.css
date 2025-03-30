@@ -1,37 +1,38 @@
-/* Основные переменные (по умолчанию светлая тема) */
+/* Default light theme variables */
 :root {
-  --color-primary: #0078d4;
-  --color-primary-hover: #005bb5;
-  --color-primary-active: #003f88;
-  --color-bg-light: #f9f9f9;
-  --color-bg-dark: #f1f1f1;
-  --color-text: #000;
-  --color-header-text: #fff;
-  --collor-text-bg: #e0e7ff;
+  --color-primary: #0078d4; /* Primary color */
+  --color-primary-hover: #005bb5; /* Hover color for primary elements */
+  --color-primary-active: #003f88; /* Active color for primary elements */
+  --color-bg-light: #f9f9f9; /* Light background color */
+  --color-bg-dark: #f1f1f1; /* Dark background color */
+  --color-text: #000; /* Default text color */
+  --color-header-text: #fff; /* Header text color */
+  --color-text-bg: #e0e7ff; /* Background color for text elements */
 
-  --border-radius: 8px;
-  --font-size-base: 16px;
-  --font-size-small: 14px;
-  --padding: 10px;
-  --button-padding: 10px 15px;
+  --border-radius: 8px; /* Border radius for rounded corners */
+  --font-size-base: 16px; /* Base font size */
+  --font-size-small: 14px; /* Small font size */
+  --padding: 10px; /* Default padding */
+  --button-padding: 10px 15px; /* Padding for buttons */
 
-  --box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  --box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); /* Box shadow for elements */
 }
 
-/* Темная тема */
+/* Dark theme variables */
 :root[data-theme="dark"] {
-  --color-primary: #1a73e8;
-  --color-primary-hover: #155ab2;
-  --color-primary-active: #103d7e;
-  --color-bg-light: #121212;
-  --color-bg-dark: #1e1e1e;
-  --color-text: #eaeaea;
-  --color-header-text: #fff;
-  --collor-text-bg: #e0e7ff;
+  --color-primary: #1a73e8; /* Primary color for dark theme */
+  --color-primary-hover: #155ab2; /* Hover color for primary elements in dark theme */
+  --color-primary-active: #103d7e; /* Active color for primary elements in dark theme */
+  --color-bg-light: #121212; /* Dark background color */
+  --color-bg-dark: #1e1e1e; /* Darker background color */
+  --color-text: #eaeaea; /* Light text color */
+  --color-header-text: #fff; /* White header text */
+  --color-text-bg: #e0e7ff; /* Background color for text elements */
 
-  --box-shadow: 0 4px 10px rgba(0, 0, 0, 0.6);
+  --box-shadow: 0 4px 10px rgba(0, 0, 0, 0.6); /* Darker box shadow */
 }
 
+/* Blink animation for elements */
 @keyframes blink {
   0% {
     opacity: 1;
@@ -44,153 +45,173 @@
   }
 }
 
+/* Class for elements that should blink */
 .blinking {
   animation: blink 1s infinite;
 }
 
-/* Общие стили */
+/* General styles */
 body {
-  font-family: Arial, sans-serif;
+  font-family: Arial, sans-serif; /* Font family */
   margin: 0;
   padding: 0;
   display: flex;
   justify-content: center;
   align-items: center;
-  min-height: 100vh;
-  background-color: var(--color-bg-light);
-  color: var(--color-text);
-  transition: background-color 0.3s ease, color 0.3s ease;
+  min-height: 100vh; /* Ensure the body fills the full height of the viewport */
+  background-color: var(--color-bg-light); /* Background color */
+  color: var(--color-text); /* Text color */
+  transition: background-color 0.3s ease, color 0.3s ease; /* Smooth transition for color changes */
 }
 
 .container {
-  width: 90%;
-  max-width: 600px;
-  height: 80vh;
+  width: 90%; /* Container width */
+  max-width: 600px; /* Maximum width */
+  height: 80vh; /* Container height */
   display: flex;
   flex-direction: column;
-  border: 1px solid var(--color-bg-dark);
-  border-radius: var(--border-radius);
-  background-color: #fff;
+  border: 1px solid var(--color-bg-dark); /* Border color */
+  border-radius: var(--border-radius); /* Rounded corners */
+  background-color: #fff; /* White background */
   overflow: hidden;
-  box-shadow: var(--box-shadow);
+  box-shadow: var(--box-shadow); /* Box shadow */
 }
 
-/* Верхняя панель */
+/* Header section */
 .header {
   padding: var(--padding);
-  background-color: var(--color-primary);
-  color: var(--color-header-text);
+  background-color: var(--color-primary); /* Primary color background */
+  color: var(--color-header-text); /* White text */
   display: flex;
-  justify-content: space-between;
-  align-items: center;
+  justify-content: space-between; /* Space between elements */
+  align-items: center; /* Align items vertically */
 }
 
 .header span {
-  font-size: calc(var(--font-size-base) + 2px);
-  font-weight: bold;
+  font-size: calc(var(--font-size-base) + 2px); /* Font size slightly larger */
+  font-weight: bold; /* Bold text */
 }
 
-/* Область текста */
+/* Text display area */
 .text-display {
   flex: 1;
   padding: var(--padding);
-  overflow-y: auto;
-  font-size: var(--font-size-base);
-  line-height: 1.5;
-  background-color: var(--color-bg-dark);
-  border-top: 1px solid var(--color-bg-light);
-  border-bottom: 1px solid var(--color-bg-light);
-  transition: background-color 0.3s ease;
+  overflow-y: auto; /* Allow scrolling if content overflows */
+  font-size: var(--font-size-base); /* Base font size */
+  line-height: 1.5; /* Line height for better readability */
+  background-color: var(--color-bg-dark); /* Dark background for text */
+  border-top: 1px solid var(--color-bg-light); /* Light border on top */
+  border-bottom: 1px solid var(--color-bg-light); /* Light border on bottom */
+  transition: background-color 0.3s ease; /* Smooth background color transition */
 }
 
+/* Styling for paragraphs inside the text display area */
 .text-display p {
-  margin: 0 0 5px;
+  margin: 0 0 5px; /* Margin at the bottom */
   padding: 5px;
-  border-radius: var(--border-radius);
+  border-radius: var(--border-radius); /* Rounded corners for paragraphs */
 }
 
+/* Class for paragraphs that have been "played" */
+.played {
+  color: #7a7a7a; /* Мягкий серый цвет текста */
+  background-color: #f1f1f1; /* Светлый фон для выделения */
+  padding: 5px; /* Немного отступа для улучшения восприятия */
+  border-radius: var(--border-radius); /* Закругленные углы */
+  opacity: 0.9; /* Легкая прозрачность */
+  transition: background-color 0.3s ease, color 0.3s ease; /* Плавные изменения */
+}
+/* Even paragraphs have a different background */
 .text-display p:nth-child(even) {
-  background-color: var(--collor-text-bg);
-  color: black;
+  background-color: var(--color-text-bg); /* Background color */
+  color: black; /* Text color */
 }
 
-/* Нижняя панель */
+/* Footer section */
 .footer {
   padding: var(--padding);
-  background-color: var(--color-bg-light);
+  background-color: var(--color-bg-light); /* Light background for footer */
   display: flex;
-  justify-content: space-between;
-  gap: var(--padding);
-  border-top: 1px solid var(--color-bg-dark);
+  justify-content: space-between; /* Space between footer elements */
+  gap: var(--padding); /* Space between elements */
+  border-top: 1px solid var(--color-bg-dark); /* Dark border on top */
 }
 
+/* Message output container styling */
 .message-output-container {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background-color: var(--color-bg-light);
-  color: var(--color-text);
-  font-size: var(--font-size-small);
+  background-color: var(--color-bg-light); /* Background color */
+  color: var(--color-text); /* Text color */
+  font-size: var(--font-size-small); /* Smaller font size */
 }
 
 .message-output-container span {
-  padding: 5px;
+  padding: 5px; /* Padding around the span elements */
 }
 
+/* Button styling */
 button {
   flex: 1;
-  padding: var(--button-padding);
+  padding: var(--button-padding); /* Button padding */
   border: none;
-  border-radius: var(--border-radius);
-  cursor: pointer;
-  font-size: var(--font-size-base);
-  background-color: var(--color-primary);
-  color: var(--color-header-text);
-  transition: background-color 0.3s ease, color 0.3s ease;
+  border-radius: var(--border-radius); /* Rounded corners */
+  cursor: pointer; /* Pointer cursor on hover */
+  font-size: var(--font-size-base); /* Base font size */
+  background-color: var(--color-primary); /* Primary background color */
+  color: var(--color-header-text); /* White text */
+  transition: background-color 0.3s ease, color 0.3s ease; /* Smooth transition for button styles */
 }
 
+/* Button hover effect */
 button:hover {
-  background-color: var(--color-primary-hover);
+  background-color: var(--color-primary-hover); /* Change background on hover */
 }
 
+/* Button active effect (when clicked) */
 button:active {
-  background-color: var(--color-primary-active);
+  background-color: var(--color-primary-active); /* Change background when button is clicked */
 }
 
+/* Image inside button */
 button img {
-    width: 20px;  /* Устанавливаем ширину иконки */
-    height: 20px; /* Устанавливаем высоту иконки */
-    margin-right: 10px; /* Расстояние между иконкой и текстом */
+  width: 20px;  /* Set width of the image */
+  height: 20px; /* Set height of the image */
+  margin-right: 10px; /* Space between the icon and text */
 }
 
-/* Адаптивность */
+/* Responsive design for smaller screens */
+
+/* For screens smaller than 768px */
 @media (max-width: 768px) {
   .container {
-    height: 90vh;
-    max-width: 95%;
+    height: 90vh; /* Increase height of container */
+    max-width: 95%; /* Allow more width */
   }
 
   .header span {
-    font-size: calc(var(--font-size-small) + 2px);
+    font-size: calc(var(--font-size-small) + 2px); /* Slightly smaller font size for header */
   }
 
   button {
-    font-size: var(--font-size-small);
-    padding: calc(var(--padding) - 2px);
+    font-size: var(--font-size-small); /* Smaller font size for buttons */
+    padding: calc(var(--padding) - 2px); /* Slightly smaller padding */
   }
 }
 
+/* For screens smaller than 480px */
 @media (max-width: 480px) {
   .header span {
-    font-size: var(--font-size-small);
+    font-size: var(--font-size-small); /* Use the small font size */
   }
 
   .text-display {
-    font-size: var(--font-size-small);
+    font-size: var(--font-size-small); /* Smaller font size for text display */
   }
 
   button {
-    font-size: calc(var(--font-size-small) - 1px);
-    padding: calc(var(--padding) - 4px);
+    font-size: calc(var(--font-size-small) - 1px); /* Even smaller font size */
+    padding: calc(var(--padding) - 4px); /* Smaller padding */
   }
 }

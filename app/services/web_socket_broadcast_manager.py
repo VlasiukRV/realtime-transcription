@@ -41,9 +41,9 @@ class WebSocketBroadcastManager:
             await self._broadcast_messages_logic()
 
     async def _broadcast_messages_logic(self):
-        text = await self._get_message_from_queue()
+        message_data = await self._get_message_from_queue()
 
-        if not text:
+        if not message_data:
             return
 
         # Remove clients with is_open == False
@@ -51,11 +51,12 @@ class WebSocketBroadcastManager:
             self.active_clients = set(client for client in self.active_clients if client.is_open)
 
         # Prepare tasks for sending messages to all clients
+        text = message_data['translated_text']
         logger.info(f"Broadcasting data to clients: {text}")
         tasks = []
         async with self.mutex_active_clients:
             for client in self.active_clients:
-                tasks.append(client.send_message(text))
+                tasks.append(client.send_message(message_data))
 
         if tasks:
             await asyncio.gather(*tasks)

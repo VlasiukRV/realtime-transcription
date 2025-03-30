@@ -4,11 +4,13 @@ from starlette.templating import Jinja2Templates
 
 from app.services.realtime_translation import RealTimeTranslation
 from app.api.dependencies import get_real_time_translation, get_jinja_template, get_static_file_versions_for_index_page, \
-    get_static_file_versions_for_admin_page
+    get_static_file_versions_for_admin_page, get_ws_broadcast_manager
 from app.utils import logger
 
 
 from pydantic import BaseModel
+
+from services.web_socket_broadcast_manager import WebSocketBroadcastManager
 
 
 class LangRequest(BaseModel):
@@ -50,10 +52,11 @@ async def render_settings_page(
 @router.post("/api/addLang")
 async def api_add_language_to_transcription_worker(
     lang_request: LangRequest,
-    real_time_translation: RealTimeTranslation = Depends(get_real_time_translation)
+    real_time_translation: RealTimeTranslation = Depends(get_real_time_translation),
+    ws_broadcast_manager: WebSocketBroadcastManager = Depends(get_ws_broadcast_manager)
 ) -> JSONResponse:
     lang = lang_request.lang
-    if await real_time_translation.add_language(lang):
+    if await real_time_translation.add_language(lang, ws_broadcast_manager):
         data = {"transcriber_status": "success", "message": f"Language {lang} added."}
     else:
         data = {"transcriber_status": "error", "message": f"Error adding Language {lang}"}

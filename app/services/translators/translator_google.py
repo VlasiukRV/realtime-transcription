@@ -1,33 +1,41 @@
 import aiohttp
+from fastapi import Depends
 
 from app.utils import logger
-from app.config import GOOGLE_TRANSLATE_API_KEY
+from app.config import GOOGLE_API_KEY
 from app.services.translators.translator import ITranslator
 
-google_translate_api_key = GOOGLE_TRANSLATE_API_KEY
-google_translate_url = "https://translation.googleapis.com/language/translate/v2"
+def google_api_key():
+    return GOOGLE_API_KEY
 
-class GoogleTranslator_HTTP(ITranslator):
-    def __init__(self):
+def google_text_to_speach_url():
+ return "https://translation.googleapis.com/language/translate/v2"
+
+class GoogleTranslatorHTTP(ITranslator):
+    def __init__(self,
+                 api_key: str = google_api_key(),
+                 url: str = google_text_to_speach_url()
+                 ):
         """
         Initializes a Translator object with an API key and a target language.
 
         """
-        self.api_key = google_translate_api_key
-        self.url = google_translate_url
+        self.api_key = api_key
+        self.url = url
 
-    async def translate_text(self, text: str, target_language):
+    async def translate_text(self, text: str, language_code: str):
         """
         Asynchronous function to translate a given text using Google Translate API.
 
         :param text: The text to be translated.
+        :param language_code:
         :return: The translated text or an error message if the translation fails.
         @type text: object
-        @param target_language: 
+        @param language_code:
         """
         params = {
             "q": text,
-            "target": target_language,
+            "target": language_code,
             "key": self.api_key,
         }
 

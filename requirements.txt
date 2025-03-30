@@ -2,6 +2,7 @@ assemblyai
 streamlit==1.38.0
 aiohttp
 google-cloud-translate==3.18.0
+google-cloud-texttospeech
 fastapi
 uvicorn
 jinja2==3.1.4
@@ -10,3 +11,4 @@ sse-starlette~=2.2.0
 starlette
 pydantic
 python-dotenv
+protobuf
