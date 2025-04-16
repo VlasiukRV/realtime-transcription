@@ -1,5 +1,4 @@
 import aiohttp
-from fastapi import Depends
 
 from app.utils import logger
 from app.config import GOOGLE_API_KEY

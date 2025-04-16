@@ -10,7 +10,7 @@ from app.utils import logger
 
 from pydantic import BaseModel
 
-from app.services.text_to_speech import GoogleTextToSpeech
+from app.services.tts.text_to_speech import GoogleTextToSpeech
 from app.services.web_socket_broadcast_manager import WebSocketBroadcastManager
 
 
@@ -93,5 +93,5 @@ async def api_get_system_state(
 @router.get("/api/languages")
 def get_languages(
         text_to_speech: GoogleTextToSpeech = Depends(get_text_to_speech)
-):
+) -> JSONResponse:
     return JSONResponse(content=text_to_speech.get_languages(), status_code=200)

@@ -12,3 +12,4 @@ starlette
 pydantic
 python-dotenv
 protobuf
+openai==1.72.0

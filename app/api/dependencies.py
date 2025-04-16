@@ -6,22 +6,19 @@ from starlette.templating import Jinja2Templates
 from app.services.realtime_translation import RealTimeTranslation
 from app.utils import generate_version
 from app.services.web_socket_broadcast_manager import WebSocketBroadcastManager
-from app.services.text_to_speech import GoogleTextToSpeech
-from app.services.translators.translator import ITranslator, TranslatorFactory
+from app.config import TRANSLATOR_TYPE
+from app.services.tts.text_to_speech import GoogleTextToSpeech
+from app.services.translators.translator_openai import OpenAITranslator
 
 
-def get_translator() -> ITranslator:
-    from app.config import TRANSLATOR_TYPE
-
-    translator_factory = TranslatorFactory()
-    translator_class = translator_factory.get_translator(TRANSLATOR_TYPE)
-    return translator_class()
+def get_open_ai_translator() -> OpenAITranslator:
+    return OpenAITranslator()
 
 def get_text_to_speech() -> GoogleTextToSpeech:
     return GoogleTextToSpeech()
 
 def get_real_time_translation() -> RealTimeTranslation:
-    return RealTimeTranslation(get_translator(), get_text_to_speech())
+    return RealTimeTranslation(translator_type=TRANSLATOR_TYPE, tts=get_text_to_speech())
 
 def get_ws_broadcast_manager() -> WebSocketBroadcastManager:
     return WebSocketBroadcastManager()

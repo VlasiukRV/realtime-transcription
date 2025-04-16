@@ -3,7 +3,8 @@ from typing import List, Type
 from enum import Enum
 
 class TranslatorType(Enum):
-    GOOGLE = "google"
+    GOOGLE = "google",
+    OPENAI = "openai"
 
 class ITranslator(ABC):
     @abstractmethod
@@ -22,10 +23,11 @@ class TranslatorFactory:
     def get_translator(self, translator_type: TranslatorType) -> Type[ITranslator]:
         from app.services.translators.translator_google import GoogleTranslatorHTTP
 
-        return GoogleTranslatorHTTP
 
-        # if translator_type == TranslatorType.GOOGLE:
-        #
-        #    return GoogleTranslator_HTTP
-        #else:
-        #    raise ValueError(f"Unknown translator type: {translator_type}")
+        if translator_type == TranslatorType.GOOGLE:
+            return GoogleTranslatorHTTP
+        elif translator_type == TranslatorType.OPENAI:
+            from app.services.translators.translator_openai import OpenAITranslator
+            return OpenAITranslator
+        else:
+            return GoogleTranslatorHTTP
