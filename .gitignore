@@ -47,3 +47,6 @@ coverage.xml
 
 # VS Code settings (if using VS Code alongside PyCharm)
 .vscode/
+
+# Project kee files
+/google_service_account_file.json

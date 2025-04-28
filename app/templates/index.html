@@ -1,40 +1,63 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="transition duration-300">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Real-Time Transcription and Translation</title>
-    <link rel="stylesheet" href="/static/css/styles.css?v={{ css_file_version }}">
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Real-Time Translation</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+        }
+    </script>
+    <style>
+        /* Image inside button */
+        button img {
+            width: 20px; /* Set width of the image */
+            height: 20px; /* Set height of the image */
+            margin-right: 10px; /* Space between the icon and text */
+        }
+    </style>
 </head>
-<body>
+<body class="flex flex-col h-screen bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition duration-300">
 
-<div class="container">
-
-    <div class="message-output-container">
-        <span id="service-message-output-icon" class="blinking">🔊</span>
-        <span id="service-message-output">...</span>
+<!-- Header -->
+<header class="bg-white dark:bg-gray-800 shadow flex items-center justify-between px-4 py-3">
+    <div class="font-bold text-xl">Logo</div>
+    <div class="flex items-center space-x-2">
+        <span> From </span>
+        <select id="sourceLang" class="border rounded px-2 py-1 dark:bg-gray-700 dark:border-gray-600">
+            <option>English</option>
+        </select>
+        <span> to </span>
+        <select id="targetLang" class="border rounded px-2 py-1 dark:bg-gray-700 dark:border-gray-600">
+        </select>
     </div>
-    <div class="header">
+    <button class="text-xl"></button>
+</header>
 
-        <div id="language-container">
-            <label for="language-select">Select Language:</label>
-        </div>
+<!-- Main content -->
+<main class="flex-1 overflow-hidden p-4 space-y-4">
+    <h2 class="text-lg font-semibold mb-2">Incoming Audio: English</h2>
 
-        <button id="toggle-theme-btn">🌙</button>
-        <button id="playAudioButton">Audio</button>
-
+    <!-- Translation block -->
+    <div id="output" class="overflow-y-auto max-h-[calc(100vh-240px)] pr-2 scroll-smooth space-y-2">
+        <!-- Translation text will be appended here -->
     </div>
 
-    <div id="output" class="text-display">
+    <!-- Add more translation blocks here -->
+</main>
 
+<!-- Footer -->
+<footer class="bg-white dark:bg-gray-800 shadow flex justify-between items-center px-4 py-3 mt-4">
+    <span id="service-message-output"
+          class="text-sm text-gray-600 dark:text-gray-300">Connected to translation server</span>
+    <div id="footer" class="flex space-x-2">
     </div>
+</footer>
 
-    <div class="footer">
-
-    </div>
-
-</div>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="/static/js/main.js?=v{{ js_file_version }}"></script>
+
 </body>
 </html>

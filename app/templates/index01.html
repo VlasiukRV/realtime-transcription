@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Real-Time Transcription and Translation</title>
+    <link rel="stylesheet" href="/static/css/styles.css?v={{ css_file_version }}">
+</head>
+<body>
+
+<div class="container">
+
+    <div class="message-output-container">
+        <span id="service-message-output-icon" class="blinking">🔊</span>
+        <span id="service-message-output">...</span>
+    </div>
+    <div class="header">
+
+        <div id="language-container">
+            <label for="language-select">Select Language:</label>
+        </div>
+
+        <button id="toggle-theme-btn">🌙</button>
+        <button id="playAudioButton">Audio</button>
+
+    </div>
+
+    <div id="output" class="text-display">
+
+    </div>
+
+    <div class="footer">
+
+    </div>
+
+</div>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="/static/js/main.js?=v{{ js_file_version }}"></script>
+</body>
+</html>
