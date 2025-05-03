@@ -1,4 +1,4 @@
-(function () {
+( ()=> {
     // Get the server hostname from the current window (useful for local/dev)
     const serverIp = window.location.hostname;
 
@@ -6,8 +6,9 @@
     const $serviceMessageOutput = $("#service-message-output");
     const $serviceMessageOutputIcon = $("#service-message-output-icon");
     const $textDisplay = $('#output');
-    const $footer = $('#footer');
+    const $side_panel = $('#side-panel');
     const $langSelect = $('#targetLang');
+    const $toggleSidePanel = $('#toggle-side-panel')
 
     // State variables
     let socket = null;
@@ -15,21 +16,6 @@
     let isPaused = false;
     let isPlaying = false;
     let wakeLock = null;
-
-    // Emoji icons used in UI
-    const ICONS = {
-        sun: '☀️',
-        moon: '🌙',
-        clear: '🔄',
-        play: '▶️',
-        pause: '⏯'
-    };
-
-    // Theme settings
-    const THEMES = {
-        light: {name: 'light', icon: ICONS.sun},
-        dark: {name: 'dark', icon: ICONS.moon}
-    };
 
     // ------------------ THEME ------------------
 
@@ -72,7 +58,7 @@
         let $next = $el.next();
         if ($next.length) return $next;
 
-        await new Promise(r => setTimeout(r, 1000));
+        await new Promise(r => setTimeout(r, 500));
         return getNextAudioElement($el);
     }
 
@@ -80,9 +66,12 @@
     async function playAudioFromElement($el) {
         const audioContent = $el.attr('data-audio-content');
         if (!audioContent) return;
+        const $icon = $el.children('span');
 
+        $icon.addClass('opacity-50 pointer-events-none');
         playAudio(audioContent, async () => {
-            $el.removeAttr('data-audio-content').addClass('played');
+            $el.removeAttr('data-audio-content')
+            $icon.text('✔');
             await playAudioFromElement(await getNextAudioElement($el));
         });
     }
@@ -126,14 +115,23 @@
     // ------------------ UI ------------------
 
     // Append new translated text to the display
-    function addText({translated_text, audio_content}) {
+    function addText({original_text, translated_text, audio_content}) {
         if (isPaused) return;
 
-        $('<div>')
-            .text(translated_text)
+        $('<div class="flex items-center w-full">')  // Контейнер по ширине
+            .append(
+                $('<div class="message bg-blue-100 dark:bg-blue-800 text-blue-900 dark:text-blue-100 rounded-lg px-4 py-2 flex-1">')
+                    .text(translated_text)
+                    .attr('title', original_text)
+            )
+            .append(
+                $('<span class="message-audio-icon ml-2 cursor-pointer w-1/12 text-center">🔊</span>').on('click', async  function (){
+                    await playAudioFromElement($(this).parent());
+                })
+            )
             .attr('data-audio-content', audio_content || null)
-            .addClass("bg-blue-100 dark:bg-blue-800 text-blue-900 dark:text-blue-100 rounded-lg px-4 py-2 block max-w-[90%]")
             .appendTo($textDisplay);
+
 
         setTimeout(() => {
             $textDisplay.scrollTop($textDisplay[0].scrollHeight);
@@ -156,10 +154,19 @@
         $serviceMessageOutputIcon.toggleClass('blinking', !isPaused);
     }
 
+    function toggleSidePanel() {
+        $side_panel.toggleClass('hidden');
+        $('main').toggleClass('shifted');
+    }
+
     // Reusable button component generator
     function getButton(text, iconUrl, alt, onClick) {
+        let html_img = `${text}<img src="${iconUrl}" alt="${alt}">`;
+        if (iconUrl === '') {
+            html_img = `${text}`;
+        }
         return $('<button>', {
-            html: `${text}<img src="${iconUrl}" alt="${alt}">`,
+            html: html_img,
             click: onClick
         }).addClass('bg-gray-200 dark:bg-gray-700 px-3 py-1 rounded hover:bg-gray-300 dark:hover:bg-gray-600');
     }
@@ -167,7 +174,7 @@
     // Build and append control buttons to footer
     function createFooterButtons() {
         const $pauseBtn = getButton('', '/static/img/play-pause-svgrepo-com.svg', 'pause', () => togglePause($pauseBtn));
-        $footer.append(
+        $side_panel.append(
             getButton('', '/static/img/theme-store.svg', 'theme', toggleTheme),
             getButton('', '/static/img/refresh-cw-alt-1-svgrepo-com.svg', 'clear', clearText),
             $pauseBtn,
@@ -237,9 +244,17 @@
 
     // Run when the page is ready
     $(document).ready(async () => {
+
+        tailwind.config = {
+            darkMode: 'class',
+        }
+
         createFooterButtons();
         setThemeFromLocalStorage();
 
+        $toggleSidePanel.click( ()=> {
+            toggleSidePanel();
+        });
         const selectedLang = localStorage.getItem('selectedLanguage') || 'ru';
         const languages = await fetchLanguages();
         initLanguageSelect(languages, selectedLang);

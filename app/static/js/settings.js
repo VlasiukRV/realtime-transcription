@@ -1,103 +1,121 @@
 (function () {
     const messageTemplate = `<h2>Status: {status}</h2><p id="message">{message}</p>`;
 
+    // Function to render the status message
     function renderMessage(response_json) {
-        let message_template_html = messageTemplate
-            .replace('{status}', response_json.transcriber_status)
-            .replace('{message}', response_json.message);
+        const status = response_json.status;
+        const transcriber_status = response_json.transcriber_status;
+        const message = response_json.message;
+        const statusColor = status === 'ok' ? 'green' : 'red';
 
-        document.getElementById('state_json').innerHTML = message_template_html
+        // Get the current date and time
+        const currentTime = new Date().toLocaleString();
+
+        // Update the DOM with the status, message, and time
+        $('#state_json')
+            .append(
+                $(`<h2 style="color:${statusColor};">Status: ${transcriber_status}</h2>`)
+            )
+            .append(
+                $(`<p id="message">${message}</p>`)
+            )
+            .append(
+                $(`<p>Time: ${currentTime}</p>`) // Add the current time
+            )
+            .append(
+                $('<br>') // Corrected: Adding a line break
+            );
     }
 
-    // const service_status_output = document.getElementById('service-status-output');
-    //
-    // const eventSource = new EventSource("/api/status");
-    //
-    // eventSource.onmessage = function (event) {
-    //     service_status_output.innerHTML = JSON.stringify(event.data, null, 2);
-    // };
-    //
-    // eventSource.onerror = function (error) {
-    //     console.log("Ошибка SSE:", error);
-    // };
 
-    // Adding a click event listener to the "startButton"
+    // Function to send requests with error handling and loading state
+    async function sendRequest(url, method, data = null) {
+        const options = {
+            method,
+            headers: {
+                'Content-Type': 'application/json', // Set content type to JSON
+            }
+        };
+
+        // Include body only for POST requests
+        if (data) {
+            options.body = JSON.stringify(data); // Stringify the body if any data is provided
+        }
+
+        try {
+            // Make the fetch request
+            const response = await fetch(url, options);
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.detail || 'Unknown error'); // If response is not OK, throw an error
+            }
+            return await response.json(); // Return the JSON response
+        } catch (error) {
+            throw new Error(error.message); // Handle any errors that occur during the request
+        }
+    }
+
+    // Handler for the "start" button
     document.getElementById('startButton').addEventListener('click', async () => {
         try {
-            // Sending a POST request to the 'api/start' endpoint
-            const response = await fetch('/api/start', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json', // Setting the content type to JSON
-                },
-            });
+            // Send a POST request to the /api/start endpoint
+            $('#startButton').disabled = true; // Disable the button to prevent repeated clicks
+            $('#responseMessage').innerHTML = 'Loading...'; // Show loading status
 
-            if (response.ok) {
-                // If the response is successful, display the response text
-                let response_json;
-                response_json = await response.json();
-                renderMessage(response_json);
-            } else {
-                // If the response is not successful, show an error message
-                document.getElementById('responseMessage').innerHTML = "Error starting the worker.";
-            }
+            const response_json = await sendRequest('/api/start', 'POST'); // Send request
+            renderMessage(response_json); // Render the status message
         } catch (error) {
-            // Handle any errors that occur during the connection with the server
-            document.getElementById('responseMessage').innerHTML = "Connection error with the server.";
+            // If an error occurs, display the error message
+            $('#responseMessage').innerHTML = `
+                        Error: $
+                        {
+                            error.message
+                        }
+        `;
+        } finally {
+            // Re-enable the start button after request completes
+            document.getElementById('startButton').disabled = false;
         }
     });
 
-    // Adding a click event listener to the "stopButton"
+    // Handler for the "stop" button
     document.getElementById('stopButton').addEventListener('click', async () => {
         try {
-            // Sending a POST request to the 'api/stop' endpoint
-            const response = await fetch('/api/stop', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json', // Setting the content type to JSON
-                },
-            });
+            // Send a POST request to the /api/stop endpoint
+            document.getElementById('stopButton').disabled = true; // Disable the button
+            document.getElementById('responseMessage').innerHTML = 'Loading...'; // Show loading status
 
-            if (response.ok) {
-                // If the response is successful, display the response text
-                let response_json;
-                response_json = await response.json();
-                renderMessage(response_json);
-            } else {
-                // If the response is not successful, show an error message
-                document.getElementById('responseMessage').innerHTML = "Error stopping the worker.";
-            }
+            const response_json = await sendRequest('/api/stop', 'POST'); // Send request
+            renderMessage(response_json); // Render the status message
         } catch (error) {
-            // Handle any errors that occur during the connection with the server
-            document.getElementById('responseMessage').innerHTML = "Connection error with the server.";
+            // If an error occurs, display the error message
+            document.getElementById('responseMessage').innerHTML = `
+        Error: $
+        {
+            error.message
+        }
+        `;
+        } finally {
+            // Re-enable the stop button after request completes
+            document.getElementById('stopButton').disabled = false;
         }
     });
 
+    // Function to load the current state when the page loads
     window.onload = async function () {
-
         try {
-            // Sending a POST request to the 'api/stop' endpoint
-            const response = await fetch('/api/state_json', {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json', // Setting the content type to JSON
-                },
-            });
-
-            if (response.ok) {
-                // If the response is successful, display the response text
-                let response_json;
-                response_json = await response.json();
-                renderMessage(response_json);
-            } else {
-                // If the response is not successful, show an error message
-                document.getElementById('state_json').innerHTML = "Error stopping the worker.";
-            }
+            // Send a GET request to the /api/state_json endpoint to fetch the current state
+            const response_json = await sendRequest('/api/state_json', 'GET');
+            renderMessage(response_json); // Render the current state
         } catch (error) {
-            // Handle any errors that occur during the connection with the server
-            document.getElementById('state_json').innerHTML = "Connection error with the server.";
+            // If an error occurs, display the error message
+            document.getElementById('state_json').innerHTML = `
+        Error: $
+        {
+            error.message
         }
-
+        `;
+        }
     };
 
 })();

@@ -5,26 +5,26 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>Real-Time Translation</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-        }
-    </script>
-    <style>
-        /* Image inside button */
-        button img {
-            width: 20px; /* Set width of the image */
-            height: 20px; /* Set height of the image */
-            margin-right: 10px; /* Space between the icon and text */
-        }
-    </style>
+    <link rel="stylesheet" href="/static/css/styles.css?v={{ css_file_version }}">
 </head>
 <body class="flex flex-col h-screen bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition duration-300">
 
+<!-- Side Panel with buttons -->
+
+<div id="side-panel" class="hidden side-panel bg-white dark:bg-gray-800 shadow px-4 py-3">
+
+</div>
+
+
 <!-- Header -->
-<header class="bg-white dark:bg-gray-800 shadow flex items-center justify-between px-4 py-3">
-    <div class="font-bold text-xl">Logo</div>
-    <div class="flex items-center space-x-2">
+<header class="bg-white dark:bg-gray-800 shadow flex items-center justify-between px-4 py-3 z-10">
+    <div class="font-bold text-xl flex items-center">
+        <button id="toggle-side-panel"
+                class="bg-gray-200 dark:bg-gray-700 px-3 py-1 rounded hover:bg-gray-300 dark:hover:bg-gray-600">...
+        </button>
+    </div>
+
+    <div class="flex items-center space-x-2 mx-auto">
         <span> From </span>
         <select id="sourceLang" class="border rounded px-2 py-1 dark:bg-gray-700 dark:border-gray-600">
             <option>English</option>
@@ -33,11 +33,13 @@
         <select id="targetLang" class="border rounded px-2 py-1 dark:bg-gray-700 dark:border-gray-600">
         </select>
     </div>
-    <button class="text-xl"></button>
+
+    <!-- Другие элементы, например, кнопки или иконки, могут быть добавлены здесь -->
 </header>
 
+
 <!-- Main content -->
-<main class="flex-1 overflow-hidden p-4 space-y-4">
+<main class="main-content flex-1 overflow-hidden p-4 space-y-4">
     <h2 class="text-lg font-semibold mb-2">Incoming Audio: English</h2>
 
     <!-- Translation block -->
@@ -49,9 +51,10 @@
 </main>
 
 <!-- Footer -->
-<footer class="bg-white dark:bg-gray-800 shadow flex justify-between items-center px-4 py-3 mt-4">
-    <span id="service-message-output"
-          class="text-sm text-gray-600 dark:text-gray-300">Connected to translation server</span>
+<footer class="footer flex justify-between items-center px-4 py-3 mt-4">
+    <span id="service-message-output" class="text-sm text-gray-600 dark:text-gray-300">
+        Connected to translation server
+    </span>
     <div id="footer" class="flex space-x-2">
     </div>
 </footer>

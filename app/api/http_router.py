@@ -69,7 +69,7 @@ async def api_start_transcription_worker(
     real_time_translation: RealTimeTranslation = Depends(get_real_time_translation)
 ) -> JSONResponse:
     await real_time_translation.start_working_tasks()
-    data = {"transcriber_status": "success", "message": f"Worker started!"}
+    data = {"status": "ok", "transcriber_status": "success", "message": f"Worker started!"}
     return JSONResponse(content=data, status_code=200)
 
 @router.post("/api/stop")
@@ -77,10 +77,10 @@ async def api_stop_transcription_worker(
     real_time_translation: RealTimeTranslation = Depends(get_real_time_translation)
 ) -> JSONResponse:
     await real_time_translation.stop_working_tasks()
-    data = {"transcriber_status": "success", "message": f"Worker stopped!"}
+    data = {"status": "ok", "transcriber_status": "success", "message": f"Worker stopped!"}
     return JSONResponse(content=data, status_code=200)
 
-@router.get("/api/stop")
+@router.get("/api/state_json")
 # API Endpoints for system state and worker management
 async def api_get_system_state(
     real_time_translation: RealTimeTranslation = Depends(get_real_time_translation)
@@ -88,7 +88,7 @@ async def api_get_system_state(
     transcriber_status = real_time_translation.transcriber.get_status() if real_time_translation.transcriber else {
         "status": "error", "message": "Not Running"}
     return JSONResponse(
-        content={"transcriber_status": transcriber_status["status"], "message": transcriber_status["message"]})
+        content={"status": "ok", "transcriber_status": transcriber_status["status"], "message": transcriber_status["message"]})
 
 @router.get("/api/languages")
 def get_languages(

@@ -3,30 +3,68 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Real-Time Transcription and Translation (Settings)</title>
+    <title>Real-Time Translation</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="/static/css/styles.css?v={{ css_file_version }}">
 </head>
 <body>
 
-<div class="container">
-    <div class="header">
-        <a href="/">
-            <button>back to Index Page</button>
-        </a>
-        <button id="startButton">Start Worker</button>
-        <button id="stopButton">Stop Worker</button>
-    </div>
+<!-- Side Panel with buttons -->
 
-    <div  class="text-display">
-        <div id="responseMessage"> </div>
-        <div id="state_json"> </div>
-    </div>
-
-    <div id="service-status-output" class="text-display">
-    </div>
+<div id="side-panel" class="hidden side-panel bg-white dark:bg-gray-800 shadow px-4 py-3">
 
 </div>
 
+<!-- Header -->
+<header class="bg-white dark:bg-gray-800 shadow flex items-center px-4 py-3 z-10">
+    <div class="font-bold text-xl flex items-center">
+        <button id="toggle-side-panel"
+                class="bg-gray-200 dark:bg-gray-700 px-3 py-1 rounded hover:bg-gray-300 dark:hover:bg-gray-600">...
+        </button>
+    </div>
+
+    <div class="bg-white dark:bg-gray-800  px-4 py-3">
+        <a href="/">
+            <button class="bg-gray-200 dark:bg-gray-700 px-3 py-1 rounded hover:bg-gray-300 dark:hover:bg-gray-600">back
+                to Index Page
+            </button>
+        </a>
+        <button id="startButton"
+                class="bg-gray-200 dark:bg-gray-700 px-3 py-1 rounded hover:bg-gray-300 dark:hover:bg-gray-600">Start
+            Worker
+        </button>
+        <button id="stopButton"
+                class="bg-gray-200 dark:bg-gray-700 px-3 py-1 rounded hover:bg-gray-300 dark:hover:bg-gray-600">Stop
+            Worker
+        </button>
+    </div>
+</header>
+
+<!-- Main content -->
+<main class="main-content flex-1 overflow-hidden p-4 space-y-4">
+    <div id="service-status-output" class="text-display">
+    </div>
+
+    <!-- Translation block -->
+    <div id="responseMessage" class="overflow-y-auto max-h-[calc(100vh-240px)] pr-2 scroll-smooth space-y-2">
+        <!-- Translation text will be appended here -->
+    </div>
+
+    <div id="state_json"></div>
+
+    <!-- Add more translation blocks here -->
+</main>
+
+<!-- Footer -->
+<footer class="footer flex justify-between items-center px-4 py-3 mt-4">
+    <span id="service-message-output" class="text-sm text-gray-600 dark:text-gray-300">
+        Connected to translation server
+    </span>
+    <div id="footer" class="flex space-x-2">
+    </div>
+</footer>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="/static/js/settings.js?=v{{ js_file_version }}"></script>
 </body>
 </html>
