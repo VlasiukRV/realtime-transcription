@@ -1,40 +1,38 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="transition duration-300">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Real-Time Transcription and Translation</title>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Server Selection</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="/static/css/styles.css?v={{ css_file_version }}">
 </head>
-<body>
+<body class="flex flex-col h-screen bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition duration-300">
 
-<div class="container">
-
-    <div class="message-output-container">
-        <span id="service-message-output-icon" class="blinking">🔊</span>
-        <span id="service-message-output">...</span>
+<!-- Central content for server selection -->
+<main class="flex flex-1 items-center justify-center">
+    <div class="bg-white dark:bg-gray-800 p-6 rounded shadow-md w-full max-w-md text-center space-y-4">
+        <h1 class="text-2xl font-semibold">Select Server</h1>
+        <select id="serverSelector" class="w-full border rounded px-4 py-2 dark:bg-gray-700 dark:border-gray-600">
+            <option value="ws://localhost:8000/ws">Local Server</option>
+            <option value="ws://http://192.168.25.160:8000/ws">Cherch</option>
+        </select>
+        <button id="connectBtn" class="bg-gray-200 dark:bg-gray-700 px-3 py-1 rounded hover:bg-gray-300 dark:hover:bg-gray-600">Connect</button>
+        <div id="statusMessage" class="text-sm mt-2 text-gray-600 dark:text-gray-300"></div>
     </div>
-    <div class="header">
+</main>
 
-        <div id="language-container">
-            <label for="language-select">Select Language:</label>
-        </div>
+<script>
+    document.getElementById('connectBtn').addEventListener('click', function () {
+        const server = document.getElementById('serverSelector').value;
+        document.getElementById('statusMessage').textContent = `Connecting to ${server}...`;
 
-        <button id="toggle-theme-btn">🌙</button>
-        <button id="playAudioButton">Audio</button>
+        // Example connection logic
+        // const socket = new WebSocket(server);
+        // socket.onopen = () => document.getElementById('statusMessage').textContent = 'Connected!';
+        // socket.onerror = () => document.getElementById('statusMessage').textContent = 'Connection error.';
+    });
+</script>
 
-    </div>
-
-    <div id="output" class="text-display">
-
-    </div>
-
-    <div class="footer">
-
-    </div>
-
-</div>
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="/static/js/main.js?=v{{ js_file_version }}"></script>
 </body>
 </html>

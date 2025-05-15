@@ -1,4 +1,5 @@
 from fastapi import APIRouter, WebSocket, Depends
+from starlette.websockets import WebSocketDisconnect
 
 from app.services.realtime_translation import RealTimeTranslation
 from app.api.dependencies import get_real_time_translation
@@ -6,6 +7,18 @@ from app.api.http_router import router as http_router
 from app.utils import logger
 
 app_router = APIRouter()
+
+@app_router.websocket("/ws/ping")
+async def websocket_ping(websocket: WebSocket):
+    await websocket.accept()
+    try:
+        await websocket.send_text("pong")
+        while True:
+            await websocket.receive_text()  # Keep it open if needed
+    except WebSocketDisconnect:
+        pass
+    except Exception as e:
+        await websocket.close(code=1011)
 
 @app_router.websocket("/ws/transcribe/{lang}")
 async def handle_lang_transcription_websocket(

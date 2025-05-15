@@ -114,10 +114,13 @@ class RealTimeTranslation:
             language_code=lang
         )
 
-        audio_content = await self.tts.text_to_speech(
-             text=translated_text,
-             language_code=lang
-         )
+        try:
+            audio_content = await self.tts.text_to_speech(
+                   text=translated_text,
+                   language_code=lang
+             )
+        except Exception as e:
+            audio_content = ""
 
         message_data = {
             "lang": lang,
